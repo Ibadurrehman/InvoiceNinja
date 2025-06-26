@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,16 +59,18 @@ export default function Settings() {
   });
 
   // Update form when settings data loads
-  if (settings && !form.formState.isDirty) {
-    form.reset({
-      companyName: settings.companyName,
-      email: settings.email,
-      phone: settings.phone || "",
-      address: settings.address || "",
-      currency: settings.currency,
-      defaultTaxRate: settings.defaultTaxRate,
-    });
-  }
+  React.useEffect(() => {
+    if (settings && !form.formState.isDirty) {
+      form.reset({
+        companyName: settings.companyName,
+        email: settings.email,
+        phone: settings.phone || "",
+        address: settings.address || "",
+        currency: settings.currency,
+        defaultTaxRate: settings.defaultTaxRate,
+      });
+    }
+  }, [settings, form]);
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: SettingsForm) => {

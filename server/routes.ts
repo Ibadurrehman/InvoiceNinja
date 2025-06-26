@@ -77,6 +77,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate next invoice number (must come before /:id route)
+  app.get("/api/invoices/next-number", async (req, res) => {
+    try {
+      const nextNumber = (storage as any).getNextInvoiceNumber();
+      res.json({ number: nextNumber });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate invoice number" });
+    }
+  });
+
   // Invoices routes
   app.get("/api/invoices", async (req, res) => {
     try {
@@ -208,15 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate next invoice number
-  app.get("/api/invoices/next-number", async (req, res) => {
-    try {
-      const nextNumber = (storage as any).getNextInvoiceNumber();
-      res.json({ number: nextNumber });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to generate invoice number" });
-    }
-  });
+
 
   const httpServer = createServer(app);
   return httpServer;

@@ -96,7 +96,13 @@ export class MemStorage implements IStorage {
 
   async createClient(insertClient: InsertClient): Promise<Client> {
     const id = this.currentClientId++;
-    const client: Client = { ...insertClient, id };
+    const client: Client = { 
+      id,
+      name: insertClient.name,
+      email: insertClient.email,
+      phone: insertClient.phone || null,
+      address: insertClient.address || null
+    };
     this.clients.set(id, client);
     return client;
   }
@@ -116,7 +122,7 @@ export class MemStorage implements IStorage {
 
   async getInvoices(): Promise<(Invoice & { client: Client })[]> {
     const invoicesWithClients = [];
-    for (const invoice of this.invoices.values()) {
+    for (const invoice of Array.from(this.invoices.values())) {
       const client = this.clients.get(invoice.clientId);
       if (client) {
         invoicesWithClients.push({ ...invoice, client });
@@ -139,8 +145,15 @@ export class MemStorage implements IStorage {
   async createInvoice(insertInvoice: InsertInvoice, items: InsertInvoiceItem[]): Promise<Invoice> {
     const id = this.currentInvoiceId++;
     const invoice: Invoice = { 
-      ...insertInvoice, 
       id,
+      number: insertInvoice.number,
+      clientId: insertInvoice.clientId,
+      status: insertInvoice.status || "draft",
+      subtotal: insertInvoice.subtotal,
+      taxRate: insertInvoice.taxRate || "0",
+      taxAmount: insertInvoice.taxAmount || "0",
+      total: insertInvoice.total,
+      dueDate: insertInvoice.dueDate,
       createdAt: new Date()
     };
     this.invoices.set(id, invoice);
@@ -166,14 +179,14 @@ export class MemStorage implements IStorage {
 
   async deleteInvoice(id: number): Promise<boolean> {
     // Delete associated items
-    for (const [itemId, item] of this.invoiceItems) {
+    for (const [itemId, item] of Array.from(this.invoiceItems.entries())) {
       if (item.invoiceId === id) {
         this.invoiceItems.delete(itemId);
       }
     }
     
     // Delete associated payments
-    for (const [paymentId, payment] of this.payments) {
+    for (const [paymentId, payment] of Array.from(this.payments.entries())) {
       if (payment.invoiceId === id) {
         this.payments.delete(paymentId);
       }
