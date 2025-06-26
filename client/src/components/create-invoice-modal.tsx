@@ -125,10 +125,11 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
       onOpenChange(false);
       form.reset();
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Invoice creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to create invoice",
+        description: error?.message || "Failed to create invoice",
         variant: "destructive",
       });
     },
@@ -147,6 +148,8 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
   };
 
   const onSubmit = (data: CreateInvoiceForm) => {
+    console.log("Form submission data:", data);
+    console.log("Form errors:", form.formState.errors);
     createInvoiceMutation.mutate(data);
   };
 
