@@ -83,7 +83,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteClient(id: number): Promise<boolean> {
     const result = await db.delete(clients).where(eq(clients.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getInvoices(): Promise<(Invoice & { client: Client })[]> {
@@ -150,7 +150,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(payments).where(eq(payments.invoiceId, id));
     
     const result = await db.delete(invoices).where(eq(invoices.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
