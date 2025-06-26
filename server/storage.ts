@@ -16,7 +16,7 @@ import {
   type InsertSettings
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, like, sum, isNull, and } from "drizzle-orm";
 
 export interface IStorage {
   // Clients
@@ -271,8 +271,27 @@ export class DatabaseStorage implements IStorage {
     return { totalIncome, dueAmount, recentTransactions: formattedTransactions };
   }
 
-  getNextInvoiceNumber(): string {
-    return `INV-${String(this.currentInvoiceNumber++).padStart(3, '0')}`;
+  async getNextInvoiceNumber(): Promise<string> {
+    // Get the highest invoice number from the database
+    const [lastInvoice] = await db
+      .select({ number: invoices.number })
+      .from(invoices)
+      .where(like(invoices.number, 'INV-%'))
+      .orderBy(desc(invoices.id))
+      .limit(1);
+
+    if (!lastInvoice) {
+      return 'INV-001';
+    }
+
+    // Extract the numeric part and increment
+    const match = lastInvoice.number.match(/INV-(\d+)/);
+    if (match) {
+      const nextNumber = parseInt(match[1]) + 1;
+      return `INV-${String(nextNumber).padStart(3, '0')}`;
+    }
+
+    return 'INV-001';
   }
 }
 
