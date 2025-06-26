@@ -105,7 +105,9 @@ RESTful API endpoints following conventional patterns:
 4. **Database Migrations**: Drizzle Kit manages schema changes
 
 ## Changelog
-- June 26, 2025. Initial setup
+- June 26, 2025: Initial setup
+- June 26, 2025: Added PostgreSQL database integration with Drizzle ORM
+- June 26, 2025: Added PDF invoice download functionality with PDFKit
 
 ## User Preferences
 

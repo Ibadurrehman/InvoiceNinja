@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { PDFGenerator } from "./pdf-generator";
 import { 
   insertClientSchema, 
   insertInvoiceSchema, 
@@ -205,6 +206,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid settings data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
+  // PDF download route
+  app.get("/api/invoices/:id/pdf", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const invoice = await storage.getInvoice(id);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+
+      const settings = await storage.getSettings();
+      if (!settings) {
+        return res.status(404).json({ message: "Settings not found" });
+      }
+
+      const pdfGenerator = new PDFGenerator();
+      const doc = pdfGenerator.generateInvoicePDF(invoice, settings);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoice.number}.pdf"`);
+
+      doc.pipe(res);
+      doc.end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate PDF" });
     }
   });
 

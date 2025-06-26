@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateInvoiceModal } from "@/components/create-invoice-modal";
 import { PaymentModal } from "@/components/payment-modal";
-import { Plus, DollarSign } from "lucide-react";
+import { Plus, DollarSign, Download } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { Invoice, Client } from "@shared/schema";
@@ -53,6 +53,15 @@ export default function Invoices() {
       default:
         return "text-muted-foreground";
     }
+  };
+
+  const downloadPDF = (invoiceId: number, invoiceNumber: string) => {
+    const link = document.createElement('a');
+    link.href = `/api/invoices/${invoiceId}/pdf`;
+    link.download = `invoice-${invoiceNumber}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (isLoading) {
@@ -125,20 +134,31 @@ export default function Invoices() {
                   <span>Created: {formatDate(invoice.createdAt)}</span>
                   <span>Due: {formatDate(invoice.dueDate)}</span>
                 </div>
-                {invoice.status !== "paid" && (
+                <div className="flex space-x-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedInvoice(invoice);
-                      setShowPaymentModal(true);
-                    }}
+                    className="flex-1"
+                    onClick={() => downloadPDF(invoice.id, invoice.number)}
                   >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Record Payment
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
                   </Button>
-                )}
+                  {invoice.status !== "paid" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedInvoice(invoice);
+                        setShowPaymentModal(true);
+                      }}
+                    >
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Record Payment
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))
