@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -56,6 +57,34 @@ export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true,
 export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).omit({ id: true });
 export const insertPaymentSchema = createInsertSchema(payments).omit({ id: true, paymentDate: true });
 export const insertSettingsSchema = createInsertSchema(settings).omit({ id: true });
+
+// Relations
+export const clientsRelations = relations(clients, ({ many }) => ({
+  invoices: many(invoices),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
+  }),
+  items: many(invoiceItems),
+  payments: many(payments),
+}));
+
+export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceItems.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [payments.invoiceId],
+    references: [invoices.id],
+  }),
+}));
 
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
