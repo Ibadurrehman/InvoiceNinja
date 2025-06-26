@@ -117,22 +117,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createInvoice(insertInvoice: InsertInvoice, items: InsertInvoiceItem[]): Promise<Invoice> {
-    const [invoice] = await db
-      .insert(invoices)
-      .values(insertInvoice)
-      .returning();
+    try {
+      // Convert string values to proper decimal format for database
+      const invoiceData = {
+        ...insertInvoice,
+        subtotal: insertInvoice.subtotal.toString(),
+        taxRate: insertInvoice.taxRate.toString(),
+        taxAmount: insertInvoice.taxAmount.toString(),
+        total: insertInvoice.total.toString(),
+      };
 
-    // Create invoice items
-    for (const item of items) {
-      await db
-        .insert(invoiceItems)
-        .values({
-          ...item,
-          invoiceId: invoice.id
-        });
+      const [invoice] = await db
+        .insert(invoices)
+        .values(invoiceData)
+        .returning();
+
+      // Create invoice items with proper decimal conversion
+      for (const item of items) {
+        await db
+          .insert(invoiceItems)
+          .values({
+            ...item,
+            invoiceId: invoice.id,
+            quantity: item.quantity.toString(),
+            rate: item.rate.toString(),
+            amount: item.amount.toString(),
+          });
+      }
+
+      return invoice;
+    } catch (error) {
+      console.error("Database error in createInvoice:", error);
+      throw error;
     }
-
-    return invoice;
   }
 
   async updateInvoice(id: number, invoiceUpdate: Partial<InsertInvoice>): Promise<Invoice | undefined> {
