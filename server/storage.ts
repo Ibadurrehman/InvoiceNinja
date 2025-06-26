@@ -277,26 +277,20 @@ export class DatabaseStorage implements IStorage {
       .select({ number: invoices.number })
       .from(invoices);
 
-    console.log("All invoices:", allInvoices);
-
     // Find the highest numeric invoice number (supports both INV-001 and INV-1 formats)
     let maxNumber = 0;
     for (const invoice of allInvoices) {
       const match = invoice.number.match(/^INV-(\d+)$/);
       if (match) {
         const num = parseInt(match[1]);
-        console.log(`Found numeric invoice: ${invoice.number} -> ${num}`);
         if (num > maxNumber) {
           maxNumber = num;
         }
       }
     }
 
-    console.log("Max number found:", maxNumber);
     const nextNumber = maxNumber + 1;
-    const result = `INV-${String(nextNumber).padStart(3, '0')}`;
-    console.log("Next invoice number:", result);
-    return result;
+    return `INV-${String(nextNumber).padStart(3, '0')}`;
   }
 }
 
