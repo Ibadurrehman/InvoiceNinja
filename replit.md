@@ -108,6 +108,7 @@ RESTful API endpoints following conventional patterns:
 - June 26, 2025: Initial setup
 - June 26, 2025: Added PostgreSQL database integration with Drizzle ORM
 - June 26, 2025: Added PDF invoice download functionality with PDFKit
+- June 26, 2025: Added Indian Rupee (INR) currency support as default with multi-currency formatting
 
 ## User Preferences
 
