@@ -272,26 +272,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNextInvoiceNumber(): Promise<string> {
-    // Get the highest invoice number from the database
-    const [lastInvoice] = await db
+    // Get all invoice numbers that follow the pattern INV-DIGITS
+    const allInvoices = await db
       .select({ number: invoices.number })
-      .from(invoices)
-      .where(like(invoices.number, 'INV-%'))
-      .orderBy(desc(invoices.id))
-      .limit(1);
+      .from(invoices);
 
-    if (!lastInvoice) {
-      return 'INV-001';
+    console.log("All invoices:", allInvoices);
+
+    // Find the highest numeric invoice number (supports both INV-001 and INV-1 formats)
+    let maxNumber = 0;
+    for (const invoice of allInvoices) {
+      const match = invoice.number.match(/^INV-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1]);
+        console.log(`Found numeric invoice: ${invoice.number} -> ${num}`);
+        if (num > maxNumber) {
+          maxNumber = num;
+        }
+      }
     }
 
-    // Extract the numeric part and increment
-    const match = lastInvoice.number.match(/INV-(\d+)/);
-    if (match) {
-      const nextNumber = parseInt(match[1]) + 1;
-      return `INV-${String(nextNumber).padStart(3, '0')}`;
-    }
-
-    return 'INV-001';
+    console.log("Max number found:", maxNumber);
+    const nextNumber = maxNumber + 1;
+    const result = `INV-${String(nextNumber).padStart(3, '0')}`;
+    console.log("Next invoice number:", result);
+    return result;
   }
 }
 
