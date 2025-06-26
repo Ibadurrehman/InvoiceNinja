@@ -106,7 +106,7 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
         taxRate: taxRate.toString(),
         taxAmount: taxAmount.toString(),
         total: total.toString(),
-        dueDate: new Date(data.dueDate),
+        dueDate: new Date(data.dueDate).toISOString(),
       };
 
       const response = await apiRequest("POST", "/api/invoices", {
