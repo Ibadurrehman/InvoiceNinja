@@ -219,8 +219,8 @@ export class DatabaseStorage implements IStorage {
         .values({
           companyName: "Your Business Name",
           email: "business@email.com",
-          currency: "USD",
-          defaultTaxRate: "10",
+          currency: "INR",
+          defaultTaxRate: "18.00",
           ...settingsUpdate
         })
         .returning();

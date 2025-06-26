@@ -33,7 +33,10 @@ const settingsSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   currency: z.string().min(1, "Currency is required"),
-  defaultTaxRate: z.string().min(0, "Tax rate must be 0 or greater"),
+  defaultTaxRate: z.string().refine((val) => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num >= 0;
+  }, "Tax rate must be a valid number 0 or greater"),
 });
 
 type SettingsForm = z.infer<typeof settingsSchema>;
@@ -53,8 +56,8 @@ export default function Settings() {
       email: "",
       phone: "",
       address: "",
-      currency: "USD",
-      defaultTaxRate: "10",
+      currency: "INR",
+      defaultTaxRate: "18.00",
     },
   });
 
