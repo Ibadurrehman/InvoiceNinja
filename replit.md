@@ -1,0 +1,112 @@
+# BillTracker Pro - Mobile Billing Application
+
+## Overview
+
+BillTracker Pro is a modern mobile-first invoice tracking and billing application built with React, TypeScript, and Express.js. The application provides a comprehensive solution for managing clients, creating invoices, tracking payments, and generating reports through an intuitive mobile interface.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **UI Library**: Shadcn/ui components with Radix UI primitives
+- **Styling**: Tailwind CSS with custom design tokens
+- **State Management**: TanStack Query (React Query) for server state
+- **Routing**: Wouter for lightweight client-side routing
+- **Form Handling**: React Hook Form with Zod validation
+- **Build Tool**: Vite for fast development and optimized builds
+
+### Backend Architecture
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js for REST API
+- **Database**: PostgreSQL with Drizzle ORM
+- **Database Provider**: Neon Database (serverless PostgreSQL)
+- **Validation**: Zod schemas shared between client and server
+- **Session Management**: PostgreSQL-based session storage
+
+### Mobile-First Design
+- **Responsive Layout**: Optimized for mobile devices with max-width container
+- **Touch-Friendly Interface**: Large buttons and intuitive navigation
+- **Progressive Web App Ready**: Configured for mobile app-like experience
+
+## Key Components
+
+### Database Schema
+The application uses a relational database structure with the following core entities:
+
+- **Clients**: Customer information (name, email, phone, address)
+- **Invoices**: Invoice details with status tracking (draft, sent, paid, overdue)
+- **Invoice Items**: Line items for each invoice with quantity, rate, and amounts
+- **Payments**: Payment records linked to invoices
+- **Settings**: Company configuration and defaults
+
+### API Structure
+RESTful API endpoints following conventional patterns:
+- `/api/clients` - Client management operations
+- `/api/invoices` - Invoice CRUD operations
+- `/api/payments` - Payment tracking
+- `/api/settings` - Application configuration
+- `/api/dashboard/stats` - Dashboard analytics
+
+### Component Architecture
+- **Layout System**: Mobile-optimized layout with sticky navigation
+- **Page Components**: Dashboard, Clients, Invoices, Reports, Settings
+- **UI Components**: Reusable Shadcn/ui components with consistent theming
+- **Form Components**: Standardized form handling with validation
+- **Modal System**: Dialog-based workflows for creating/editing entities
+
+## Data Flow
+
+1. **Client Request**: User interactions trigger API calls through TanStack Query
+2. **API Processing**: Express.js routes handle requests with Zod validation
+3. **Database Operations**: Drizzle ORM manages PostgreSQL interactions
+4. **Response Handling**: Server returns JSON responses with error handling
+5. **State Updates**: TanStack Query updates client state and triggers re-renders
+6. **UI Updates**: React components re-render with new data
+
+### Key Data Patterns
+- **Optimistic Updates**: Immediate UI feedback with server reconciliation
+- **Real-time Sync**: Automatic background data fetching and cache invalidation
+- **Error Boundaries**: Graceful error handling throughout the application
+- **Loading States**: Skeleton components and loading indicators
+
+## External Dependencies
+
+### Core Dependencies
+- **Database**: Neon Database (serverless PostgreSQL)
+- **ORM**: Drizzle ORM with PostgreSQL adapter
+- **UI Framework**: Radix UI primitives for accessibility
+- **Styling**: Tailwind CSS for utility-first styling
+- **Icons**: Lucide React for consistent iconography
+
+### Development Tools
+- **TypeScript**: Strong typing across the full stack
+- **ESBuild**: Fast production bundling for server code
+- **Vite**: Development server and build tool
+- **Replit Integration**: Cartographer plugin for Replit environment
+
+## Deployment Strategy
+
+### Development Environment
+- **Platform**: Replit with Node.js 20 runtime
+- **Database**: PostgreSQL 16 module
+- **Hot Reload**: Vite development server with HMR
+- **Environment Variables**: DATABASE_URL for database connection
+
+### Production Build
+- **Frontend**: Vite build outputs static assets to `dist/public`
+- **Backend**: ESBuild bundles server code to `dist/index.js`
+- **Deployment**: Autoscale deployment target on Replit
+- **Port Configuration**: Server runs on port 5000, mapped to external port 80
+
+### Build Process
+1. **Frontend Build**: `vite build` compiles React application
+2. **Backend Build**: `esbuild` bundles Node.js server with external packages
+3. **Static Assets**: Frontend assets served from Express.js in production
+4. **Database Migrations**: Drizzle Kit manages schema changes
+
+## Changelog
+- June 26, 2025. Initial setup
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
