@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateInvoiceModal } from "@/components/create-invoice-modal";
-import { Plus } from "lucide-react";
+import { PaymentModal } from "@/components/payment-modal";
+import { Plus, DollarSign } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { Invoice, Client } from "@shared/schema";
@@ -15,6 +16,8 @@ type FilterType = "all" | "paid" | "sent" | "overdue";
 
 export default function Invoices() {
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceWithClient | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
 
   const { data: invoices, isLoading } = useQuery<InvoiceWithClient[]>({
@@ -118,10 +121,24 @@ export default function Invoices() {
                     </Badge>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                   <span>Created: {formatDate(invoice.createdAt)}</span>
                   <span>Due: {formatDate(invoice.dueDate)}</span>
                 </div>
+                {invoice.status !== "paid" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedInvoice(invoice);
+                      setShowPaymentModal(true);
+                    }}
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Record Payment
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))
@@ -132,6 +149,16 @@ export default function Invoices() {
         open={showCreateInvoice}
         onOpenChange={setShowCreateInvoice}
       />
+
+      {selectedInvoice && (
+        <PaymentModal
+          open={showPaymentModal}
+          onOpenChange={setShowPaymentModal}
+          invoiceId={selectedInvoice.id}
+          invoiceNumber={selectedInvoice.number}
+          totalAmount={selectedInvoice.total}
+        />
+      )}
     </div>
   );
 }
