@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Client } from "@shared/schema";
+import type { Client, Settings } from "@shared/schema";
 
 const invoiceItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
@@ -55,16 +55,6 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<CreateInvoiceForm>({
-    resolver: zodResolver(createInvoiceSchema),
-    defaultValues: {
-      clientId: "",
-      dueDate: "",
-      taxRate: "10",
-      items: [{ description: "", quantity: "1", rate: "" }],
-    },
-  });
-
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
@@ -72,6 +62,27 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
   const { data: nextNumber } = useQuery<{ number: string }>({
     queryKey: ["/api/invoices/next-number"],
   });
+
+  const { data: settings } = useQuery<Settings>({
+    queryKey: ["/api/settings"],
+  });
+
+  const form = useForm<CreateInvoiceForm>({
+    resolver: zodResolver(createInvoiceSchema),
+    defaultValues: {
+      clientId: "",
+      dueDate: "",
+      taxRate: "0",
+      items: [{ description: "", quantity: "1", rate: "" }],
+    },
+  });
+
+  // Update tax rate when settings load
+  useEffect(() => {
+    if (settings?.defaultTaxRate) {
+      form.setValue("taxRate", settings.defaultTaxRate);
+    }
+  }, [settings, form]);
 
   const createInvoiceMutation = useMutation({
     mutationFn: async (data: CreateInvoiceForm) => {
