@@ -5,11 +5,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number | string): string {
+export function formatCurrency(amount: number | string, currency: string = 'INR'): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
+  
+  // Currency-specific formatting
+  const currencyConfig = {
+    'INR': { locale: 'en-IN', currency: 'INR' },
+    'USD': { locale: 'en-US', currency: 'USD' },
+    'EUR': { locale: 'en-EU', currency: 'EUR' },
+    'GBP': { locale: 'en-GB', currency: 'GBP' }
+  };
+  
+  const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+  
+  return new Intl.NumberFormat(config.locale, {
     style: 'currency',
-    currency: 'USD',
+    currency: config.currency,
   }).format(numAmount);
 }
 

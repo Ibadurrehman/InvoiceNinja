@@ -200,10 +200,10 @@ export class DatabaseStorage implements IStorage {
       return await this.updateSettings({
         companyName: 'Your Company Name',
         email: 'contact@yourcompany.com',
-        phone: '+1 (555) 123-4567',
-        address: '123 Business Street, City, State 12345',
-        currency: 'USD',
-        defaultTaxRate: '10.00'
+        phone: '+91 98765 43210',
+        address: '123 Business Street, City, State, India',
+        currency: 'INR',
+        defaultTaxRate: '18.00'
       });
     }
     

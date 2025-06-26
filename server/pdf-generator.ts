@@ -18,10 +18,10 @@ export class PDFGenerator {
     this.addClientDetails(doc, invoice.client);
     
     // Items table
-    this.addItemsTable(doc, invoice.items);
+    this.addItemsTable(doc, invoice.items, settings.currency);
     
     // Totals
-    this.addTotals(doc, invoice);
+    this.addTotals(doc, invoice, settings.currency);
     
     // Footer
     this.addFooter(doc, settings);
@@ -80,13 +80,22 @@ export class PDFGenerator {
     }
   }
 
-  private addItemsTable(doc: PDFKit.PDFDocument, items: InvoiceItem[]) {
+  private addItemsTable(doc: PDFKit.PDFDocument, items: InvoiceItem[], currency: string = 'INR') {
     const tableTop = 280;
     const itemCodeX = 50;
     const descriptionX = 150;
     const quantityX = 350;
     const rateX = 420;
     const amountX = 490;
+
+    // Currency symbol mapping
+    const currencySymbols = {
+      'INR': '₹',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£'
+    };
+    const symbol = currencySymbols[currency as keyof typeof currencySymbols] || '₹';
 
     // Table headers
     doc.fontSize(12)
@@ -107,8 +116,8 @@ export class PDFGenerator {
       doc.fontSize(10)
          .text(item.description, descriptionX, currentY)
          .text(item.quantity, quantityX, currentY)
-         .text(`$${parseFloat(item.rate).toFixed(2)}`, rateX, currentY)
-         .text(`$${parseFloat(item.amount).toFixed(2)}`, amountX, currentY);
+         .text(`${symbol}${parseFloat(item.rate).toFixed(2)}`, rateX, currentY)
+         .text(`${symbol}${parseFloat(item.amount).toFixed(2)}`, amountX, currentY);
 
       currentY += 25;
     });
@@ -121,19 +130,28 @@ export class PDFGenerator {
     return currentY + 20;
   }
 
-  private addTotals(doc: PDFKit.PDFDocument, invoice: Invoice) {
+  private addTotals(doc: PDFKit.PDFDocument, invoice: Invoice, currency: string = 'INR') {
     const totalsX = 400;
     let currentY = 400;
 
+    // Currency symbol mapping
+    const currencySymbols = {
+      'INR': '₹',
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£'
+    };
+    const symbol = currencySymbols[currency as keyof typeof currencySymbols] || '₹';
+
     doc.fontSize(11)
        .text('Subtotal:', totalsX, currentY)
-       .text(`$${parseFloat(invoice.subtotal).toFixed(2)}`, totalsX + 80, currentY);
+       .text(`${symbol}${parseFloat(invoice.subtotal).toFixed(2)}`, totalsX + 80, currentY);
 
     currentY += 20;
     
     if (parseFloat(invoice.taxRate) > 0) {
       doc.text(`Tax (${invoice.taxRate}%):`, totalsX, currentY)
-         .text(`$${parseFloat(invoice.taxAmount).toFixed(2)}`, totalsX + 80, currentY);
+         .text(`${symbol}${parseFloat(invoice.taxAmount).toFixed(2)}`, totalsX + 80, currentY);
       currentY += 20;
     }
 
@@ -146,7 +164,7 @@ export class PDFGenerator {
 
     doc.fontSize(12)
        .text('Total:', totalsX, currentY)
-       .text(`$${parseFloat(invoice.total).toFixed(2)}`, totalsX + 80, currentY);
+       .text(`${symbol}${parseFloat(invoice.total).toFixed(2)}`, totalsX + 80, currentY);
   }
 
   private addFooter(doc: PDFKit.PDFDocument, settings: Settings) {
