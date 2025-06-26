@@ -194,7 +194,20 @@ export class DatabaseStorage implements IStorage {
 
   async getSettings(): Promise<Settings | undefined> {
     const [setting] = await db.select().from(settings).limit(1);
-    return setting || undefined;
+    
+    // Create default settings if none exist
+    if (!setting) {
+      return await this.updateSettings({
+        companyName: 'Your Company Name',
+        email: 'contact@yourcompany.com',
+        phone: '+1 (555) 123-4567',
+        address: '123 Business Street, City, State 12345',
+        currency: 'USD',
+        defaultTaxRate: '10.00'
+      });
+    }
+    
+    return setting;
   }
 
   async updateSettings(settingsUpdate: Partial<InsertSettings>): Promise<Settings> {
