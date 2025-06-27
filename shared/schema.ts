@@ -93,8 +93,10 @@ export const settings = pgTable("settings", {
 export const insertCompanySchema = createInsertSchema(companies).omit({ id: true, createdAt: true });
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({ id: true, createdAt: true });
-export const insertClientSchema = createInsertSchema(clients).omit({ id: true, companyId: true });
-export const createClientSchema = insertClientSchema; // Schema for frontend validation (without companyId)
+// Client schema for frontend (without companyId)
+export const createClientSchema = createInsertSchema(clients).omit({ id: true, companyId: true });
+// Client schema for backend (with companyId required)
+export const insertClientSchema = createInsertSchema(clients).omit({ id: true });
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true }).extend({
   dueDate: z.union([z.string(), z.date()]).transform((val) => 
     typeof val === 'string' ? new Date(val) : val
