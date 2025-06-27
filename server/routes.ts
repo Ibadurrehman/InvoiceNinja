@@ -16,6 +16,15 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+// Extend the Request interface to include companyId
+declare global {
+  namespace Express {
+    interface Request {
+      companyId?: number;
+    }
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
   app.use(session(sessionConfig));
@@ -170,11 +179,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/invoices/:id", async (req, res) => {
+  app.put("/api/invoices/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const invoiceData = insertInvoiceSchema.partial().parse(req.body);
-      const invoice = await storage.updateInvoice(id, invoiceData);
+      const invoice = await storage.updateInvoice(id, invoiceData, req.companyId);
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }
@@ -187,10 +196,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/invoices/:id", async (req, res) => {
+  app.delete("/api/invoices/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteInvoice(id);
+      const deleted = await storage.deleteInvoice(id, req.companyId);
       if (!deleted) {
         return res.status(404).json({ message: "Invoice not found" });
       }
@@ -201,17 +210,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payments routes
-  app.get("/api/payments", async (req, res) => {
+  app.get("/api/payments", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const invoiceId = req.query.invoiceId ? parseInt(req.query.invoiceId as string) : undefined;
-      const payments = await storage.getPayments(invoiceId);
+      const payments = await storage.getPayments(req.companyId, invoiceId);
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch payments" });
     }
   });
 
-  app.post("/api/payments", async (req, res) => {
+  app.post("/api/payments", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const paymentData = insertPaymentSchema.parse(req.body);
       const payment = await storage.createPayment(paymentData);
