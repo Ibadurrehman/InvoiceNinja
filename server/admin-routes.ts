@@ -158,12 +158,12 @@ export function registerAdminRoutes(app: Express) {
       const id = parseInt(req.params.id);
 
       // Check if company has users
-      const userList = await db
-        .select({ id: users.id })
+      const [userCount] = await db
+        .select({ count: users.id })
         .from(users)
         .where(eq(users.companyId, id));
 
-      if (userList.length > 0) {
+      if (userCount.count > 0) {
         return res.status(400).json({ 
           message: "Cannot delete company with existing users" 
         });
