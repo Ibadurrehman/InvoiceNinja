@@ -90,12 +90,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             </Button>
           </form>
           
-          <div className="mt-6 text-sm text-center text-gray-600 dark:text-gray-400">
-            <p>Default credentials:</p>
-            <p className="font-mono text-xs">
-              admin@billtracker.com / password123
-            </p>
-          </div>
+
         </CardContent>
       </Card>
     </div>
