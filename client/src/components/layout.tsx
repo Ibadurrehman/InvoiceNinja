@@ -11,8 +11,7 @@ import {
   Moon, 
   Sun, 
   Bell,
-  File,
-  Shield
+  File
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,15 +49,6 @@ export function Layout({ children }: LayoutProps) {
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <Link href="/admin">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              <Shield className="h-4 w-4" />
-            </Button>
-          </Link>
           <Button
             variant="ghost"
             size="sm"
