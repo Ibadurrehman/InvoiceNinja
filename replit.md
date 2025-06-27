@@ -2,7 +2,7 @@
 
 ## Overview
 
-BillTracker Pro is a modern mobile-first invoice tracking and billing application built with React, TypeScript, and Express.js. The application provides a comprehensive solution for managing clients, creating invoices, tracking payments, and generating reports through an intuitive mobile interface.
+BillTracker Pro is a comprehensive billing and customer management platform with dual interfaces: a mobile-first billing application for day-to-day operations and a desktop-optimized admin dashboard for comprehensive business management. Built with React, TypeScript, and Express.js, the platform provides complete solutions for managing clients, creating invoices, tracking payments, generating reports, and administering user accounts through responsive, intuitive interfaces.
 
 ## System Architecture
 
@@ -23,10 +23,10 @@ BillTracker Pro is a modern mobile-first invoice tracking and billing applicatio
 - **Validation**: Zod schemas shared between client and server
 - **Session Management**: PostgreSQL-based session storage
 
-### Mobile-First Design
-- **Responsive Layout**: Optimized for mobile devices with max-width container
-- **Touch-Friendly Interface**: Large buttons and intuitive navigation
-- **Progressive Web App Ready**: Configured for mobile app-like experience
+### Dual Interface Design
+- **Mobile-First Billing App**: Optimized for mobile devices with max-width container, touch-friendly interface, and progressive web app capabilities
+- **Desktop Admin Dashboard**: Comprehensive management interface with sidebar navigation, advanced analytics, and desktop-optimized workflows
+- **Responsive Architecture**: Both interfaces adapt seamlessly across different screen sizes
 
 ## Key Components
 
@@ -41,18 +41,40 @@ The application uses a relational database structure with the following core ent
 
 ### API Structure
 RESTful API endpoints following conventional patterns:
+
+**Mobile Billing App APIs:**
 - `/api/clients` - Client management operations
 - `/api/invoices` - Invoice CRUD operations
 - `/api/payments` - Payment tracking
 - `/api/settings` - Application configuration
 - `/api/dashboard/stats` - Dashboard analytics
 
+**Admin Dashboard APIs:**
+- `/api/admin/dashboard/stats` - Enhanced admin analytics
+- `/api/admin/customers/stats` - Customer management statistics
+- `/api/admin/billing/stats` - Billing performance metrics
+- `/api/admin/users` - User management operations
+- `/api/admin/users/stats` - User statistics
+- `/api/admin/settings` - System configuration
+- `/api/admin/backup` - Backup and recovery operations
+
 ### Component Architecture
-- **Layout System**: Mobile-optimized layout with sticky navigation
+
+**Mobile Billing App:**
+- **Layout System**: Mobile-optimized layout with sticky navigation and bottom tab bar
 - **Page Components**: Dashboard, Clients, Invoices, Reports, Settings
-- **UI Components**: Reusable Shadcn/ui components with consistent theming
-- **Form Components**: Standardized form handling with validation
-- **Modal System**: Dialog-based workflows for creating/editing entities
+- **Touch-Optimized Interface**: Large buttons and swipe-friendly interactions
+
+**Admin Dashboard:**
+- **AdminLayout**: Desktop-optimized sidebar navigation with collapsible menu
+- **Dashboard Pages**: Comprehensive analytics, customer management, billing oversight, user administration
+- **Data Tables**: Advanced filtering, sorting, and bulk operations
+- **Modal Workflows**: Complex form handling and detailed entity management
+
+**Shared Components:**
+- **UI Library**: Reusable Shadcn/ui components with consistent theming
+- **Form System**: React Hook Form with Zod validation across both interfaces
+- **Theme Provider**: Unified dark/light mode support
 
 ## Data Flow
 
@@ -109,6 +131,11 @@ RESTful API endpoints following conventional patterns:
 - June 26, 2025: Added PostgreSQL database integration with Drizzle ORM
 - June 26, 2025: Added PDF invoice download functionality with PDFKit
 - June 26, 2025: Added Indian Rupee (INR) currency support as default with multi-currency formatting
+- June 27, 2025: Implemented comprehensive admin dashboard with desktop-optimized interface
+- June 27, 2025: Added dual routing system supporting both mobile billing app and admin dashboard
+- June 27, 2025: Created admin-specific components: customer management, billing oversight, user administration
+- June 27, 2025: Implemented enhanced analytics and reporting for administrative users
+- June 27, 2025: Added system settings management with security and backup configuration
 
 ## User Preferences
 
