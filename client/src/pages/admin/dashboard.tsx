@@ -30,6 +30,7 @@ import {
   Eye,
   Edit,
   Download,
+  BarChart3,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -306,12 +307,17 @@ export default function AdminDashboard() {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Latest payment transactions across all customers</CardDescription>
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-purple-500/10 to-purple-600/10 border-b border-purple-200/20">
+              <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg mr-3">
+                  <CreditCard className="h-4 w-4 text-white" />
+                </div>
+                Recent Transactions
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400">Latest payment transactions across all customers</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-gradient-to-b from-purple-50/20 to-transparent dark:from-purple-900/10">
               <div className="space-y-4">
                 {stats?.recentTransactions?.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between border-b pb-4">
@@ -346,12 +352,17 @@ export default function AdminDashboard() {
 
         {/* Top Customers Tab */}
         <TabsContent value="customers" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Customers</CardTitle>
-              <CardDescription>Your highest-value customers by total spending</CardDescription>
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-green-600/10 border-b border-emerald-200/20">
+              <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg mr-3">
+                  <Users className="h-4 w-4 text-white" />
+                </div>
+                Top Customers
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400">Your highest-value customers by total spending</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-gradient-to-b from-emerald-50/20 to-transparent dark:from-emerald-900/10">
               <div className="space-y-4">
                 {stats?.topCustomers?.map((customer, index) => (
                   <div key={customer.id} className="flex items-center justify-between">
@@ -385,30 +396,42 @@ export default function AdminDashboard() {
         {/* Analytics Tab */}
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Revenue Trend</CardTitle>
-                <CardDescription>Monthly revenue over time</CardDescription>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-indigo-500/10 to-indigo-600/10 border-b border-indigo-200/20">
+                <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg mr-3">
+                    <TrendingUp className="h-4 w-4 text-white" />
+                  </div>
+                  Revenue Trend
+                </CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">Monthly revenue over time</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-gradient-to-r from-primary/10 to-primary/20 rounded-lg flex items-center justify-center">
+              <CardContent className="bg-gradient-to-b from-indigo-50/20 to-transparent dark:from-indigo-900/10">
+                <div className="h-64 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl border border-indigo-200/30 dark:border-indigo-700/30 flex items-center justify-center backdrop-blur-sm">
                   <div className="text-center">
-                    <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">Chart visualization will be added here</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Integration with charting library coming soon
+                    <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full mx-auto mb-4 shadow-lg">
+                      <TrendingUp className="h-8 w-8 text-white" />
+                    </div>
+                    <p className="text-slate-700 dark:text-slate-300 font-medium">Chart visualization area</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                      Advanced analytics dashboard ready for chart integration
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Key business indicators</CardDescription>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border-b border-orange-200/20">
+                <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg mr-3">
+                    <BarChart3 className="h-4 w-4 text-white" />
+                  </div>
+                  Performance Metrics
+                </CardTitle>
+                <CardDescription className="text-slate-600 dark:text-slate-400">Key business indicators</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-gradient-to-b from-orange-50/20 to-transparent dark:from-orange-900/10">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Average Payment Time</span>
