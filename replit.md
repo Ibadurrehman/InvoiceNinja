@@ -115,6 +115,7 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Implemented complete user authentication system for main billing application with login/logout functionality
 - June 27, 2025: Fixed critical data isolation security vulnerability in multi-tenant system - all API routes now enforce company-based data filtering
 - June 27, 2025: Fixed client creation validation error by implementing separate frontend/backend validation schemas
+- June 27, 2025: Fixed invoice creation validation error - implemented proper authentication and company-based data injection for invoice creation
 
 ## User Preferences
 
