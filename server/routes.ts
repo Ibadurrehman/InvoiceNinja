@@ -1,17 +1,55 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import session from "express-session";
 import { storage } from "./storage";
+import { authService } from "./auth";
+import { sessionConfig, requireAuth, requireCompanyAccess } from "./session";
+import { registerAdminRoutes } from "./admin-routes";
 import { PDFGenerator } from "./pdf-generator";
 import { 
   insertClientSchema, 
   insertInvoiceSchema, 
   insertInvoiceItemSchema,
   insertPaymentSchema,
-  insertSettingsSchema 
+  insertSettingsSchema,
+  loginSchema
 } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Session middleware
+  app.use(session(sessionConfig));
+
+  // Register admin routes
+  registerAdminRoutes(app);
+
+  // User authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+      
+      const user = await authService.authenticateUser(email, password);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      req.session.user = user;
+      res.json({ user });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(400).json({ message: "Invalid request data" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.user = undefined;
+    res.json({ message: "Logged out successfully" });
+  });
+
+  app.get("/api/auth/me", requireAuth, (req, res) => {
+    res.json({ user: req.session.user });
+  });
+
   // Clients routes
   app.get("/api/clients", async (req, res) => {
     try {
