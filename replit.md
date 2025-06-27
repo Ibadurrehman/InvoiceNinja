@@ -109,6 +109,9 @@ RESTful API endpoints following conventional patterns:
 - June 26, 2025: Added PostgreSQL database integration with Drizzle ORM
 - June 26, 2025: Added PDF invoice download functionality with PDFKit
 - June 26, 2025: Added Indian Rupee (INR) currency support as default with multi-currency formatting
+- June 27, 2025: Implemented multi-tenant admin dashboard with company management system
+- June 27, 2025: Added admin authentication with bcrypt password hashing and session management
+- June 27, 2025: Fixed company creation API and improved admin dashboard UI with colorful gradient cards
 
 ## User Preferences
 

@@ -134,50 +134,64 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
-              <Building className="h-4 w-4 text-muted-foreground" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Companies</CardTitle>
+              <Building className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCompanies || companies.length}</div>
+              <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                {Array.isArray(companies) ? companies.length : 0}
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                All registered companies
+              </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Companies</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Active Companies</CardTitle>
+              <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.activeCompanies || companies.filter((c: Company) => c.isActive).length}
+              <div className="text-3xl font-bold text-green-900 dark:text-green-100">
+                {Array.isArray(companies) ? companies.filter((c: Company) => c.isActive).length : 0}
               </div>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                Currently active
+              </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Users</CardTitle>
+              <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.totalUsers || companies.reduce((sum: number, c: Company) => sum + c.userCount, 0)}
+              <div className="text-3xl font-bold text-purple-900 dark:text-purple-100">
+                {Array.isArray(companies) ? companies.reduce((sum: number, c: Company) => sum + (c.userCount || 0), 0) : 0}
               </div>
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Across all companies
+              </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-300">Active Users</CardTitle>
+              <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.activeUsers || companies.reduce((sum: number, c: Company) => sum + c.userCount, 0)}
+              <div className="text-3xl font-bold text-orange-900 dark:text-orange-100">
+                {Array.isArray(companies) ? companies.reduce((sum: number, c: Company) => sum + (c.userCount || 0), 0) : 0}
               </div>
+              <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                Currently online
+              </p>
             </CardContent>
           </Card>
         </div>
