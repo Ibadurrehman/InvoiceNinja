@@ -37,6 +37,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <AppContent />
+          <PWAInstallPrompt />
           <Toaster />
         </TooltipProvider>
       </QueryClientProvider>
