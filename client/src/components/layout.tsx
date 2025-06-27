@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Home, 
   Users, 
@@ -11,7 +14,8 @@ import {
   Moon, 
   Sun, 
   Bell,
-  File
+  File,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +24,10 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: Home },
@@ -31,8 +37,24 @@ export function Layout({ children }: LayoutProps) {
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/logout");
+      return response.json();
+    },
+    onSuccess: () => {
+      // Clear all queries and redirect to login
+      queryClient.clear();
+      setLocation("/login");
+    },
+  });
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   return (
