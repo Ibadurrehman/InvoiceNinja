@@ -9,7 +9,8 @@ import { PDFGenerator } from "./pdf-generator";
 import { 
   insertClientSchema,
   createClientSchema,
-  insertInvoiceSchema, 
+  insertInvoiceSchema,
+  createInvoiceSchema as frontendInvoiceSchema,
   insertInvoiceItemSchema,
   insertPaymentSchema,
   insertSettingsSchema,
@@ -189,15 +190,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const createInvoiceSchema = z.object({
-    invoice: insertInvoiceSchema,
+  const createInvoiceRequestSchema = z.object({
+    invoice: frontendInvoiceSchema,
     items: z.array(insertInvoiceItemSchema)
   });
 
-  app.post("/api/invoices", async (req, res) => {
+  app.post("/api/invoices", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const { invoice: invoiceData, items } = createInvoiceSchema.parse(req.body);
-      const invoice = await storage.createInvoice(invoiceData, items);
+      const { invoice: invoiceData, items } = createInvoiceRequestSchema.parse(req.body);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      
+      // Add companyId to invoice data
+      const invoiceWithCompany = { ...invoiceData, companyId };
+      const invoice = await storage.createInvoice(invoiceWithCompany, items);
       res.status(201).json(invoice);
     } catch (error) {
       console.error("Invoice creation error:", error);

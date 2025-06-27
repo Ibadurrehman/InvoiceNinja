@@ -30,21 +30,22 @@ import { Trash2, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Client, Settings } from "@shared/schema";
+import { createInvoiceSchema as invoiceSchema, insertInvoiceItemSchema } from "@shared/schema";
 
-const invoiceItemSchema = z.object({
+const frontendInvoiceItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
   quantity: z.string().min(1, "Quantity is required"),
   rate: z.string().min(1, "Rate is required"),
 });
 
-const createInvoiceSchema = z.object({
+const frontendCreateInvoiceSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
   dueDate: z.string().min(1, "Due date is required"),
   taxRate: z.string().optional(),
-  items: z.array(invoiceItemSchema).min(1, "At least one item is required"),
+  items: z.array(frontendInvoiceItemSchema).min(1, "At least one item is required"),
 });
 
-type CreateInvoiceForm = z.infer<typeof createInvoiceSchema>;
+type CreateInvoiceForm = z.infer<typeof frontendCreateInvoiceSchema>;
 
 interface CreateInvoiceModalProps {
   open: boolean;
@@ -68,7 +69,7 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
   });
 
   const form = useForm<CreateInvoiceForm>({
-    resolver: zodResolver(createInvoiceSchema),
+    resolver: zodResolver(frontendCreateInvoiceSchema),
     defaultValues: {
       clientId: "",
       dueDate: "",

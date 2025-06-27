@@ -97,6 +97,13 @@ export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({ id: t
 export const createClientSchema = createInsertSchema(clients).omit({ id: true, companyId: true });
 // Client schema for backend (with companyId required)
 export const insertClientSchema = createInsertSchema(clients).omit({ id: true });
+// Invoice schema for frontend (without companyId)
+export const createInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true, companyId: true }).extend({
+  dueDate: z.union([z.string(), z.date()]).transform((val) => 
+    typeof val === 'string' ? new Date(val) : val
+  )
+});
+// Invoice schema for backend (with companyId required)
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({ id: true, createdAt: true }).extend({
   dueDate: z.union([z.string(), z.date()]).transform((val) => 
     typeof val === 'string' ? new Date(val) : val
