@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,6 +16,47 @@ import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  return (
+    <Switch>
+      <Route path="/admin" component={() => <AdminLayout />} />
+      <Route path="/login" component={Login} />
+      <Route path="/" component={Dashboard} />
+      <Route path="/clients" component={Clients} />
+      <Route path="/invoices" component={Invoices} />
+      <Route path="/reports" component={Reports} />
+      <Route path="/settings" component={Settings} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="billtracker-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AppContent />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
+}
+
+function AppContent() {
+  return (
+    <Switch>
+      {/* Routes that don't need layout */}
+      <Route path="/admin" component={() => <AdminLayout />} />
+      <Route path="/login" component={Login} />
+      
+      {/* Routes that need authentication and layout */}
+      <Route component={AuthenticatedApp} />
+    </Switch>
+  );
+}
+
+function AuthenticatedApp() {
   const { isAuthenticated, isLoading } = useAuth();
 
   // Show loading state while checking authentication
@@ -30,44 +71,23 @@ function Router() {
     );
   }
 
-  return (
-    <Switch>
-      {/* Admin routes are always accessible */}
-      <Route path="/admin" component={() => <AdminLayout />} />
-      
-      {/* Public login route */}
-      <Route path="/login" component={Login} />
-      
-      {/* Protected routes - require authentication */}
-      {isAuthenticated ? (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/clients" component={Clients} />
-          <Route path="/invoices" component={Invoices} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/settings" component={Settings} />
-        </>
-      ) : (
-        <Route component={Login} />
-      )}
-      
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+  // If not authenticated, show login page
+  if (!isAuthenticated) {
+    return <Login />;
+  }
 
-function App() {
+  // Show authenticated app with layout
   return (
-    <ThemeProvider defaultTheme="light" storageKey="billtracker-theme">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Layout>
-            <Router />
-          </Layout>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/invoices" component={Invoices} />
+        <Route path="/reports" component={Reports} />
+        <Route path="/settings" component={Settings} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
