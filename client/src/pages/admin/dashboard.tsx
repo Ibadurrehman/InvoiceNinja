@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Building, Users, Activity, LogOut } from "lucide-react";
+import { Plus, Building, Users, Activity, LogOut, Edit, Trash2, MoreHorizontal } from "lucide-react";
 
 interface AdminDashboardProps {
   admin: any;
@@ -28,6 +31,9 @@ interface Company {
 
 export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [newCompany, setNewCompany] = useState({
     name: "",
     email: "",
@@ -36,6 +42,14 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
     adminFirstName: "",
     adminLastName: "",
     adminPassword: "",
+  });
+  const [editCompany, setEditCompany] = useState({
+    id: 0,
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    isActive: true,
   });
   
   const { toast } = useToast();
@@ -84,9 +98,88 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
     },
   });
 
+  // Update company mutation
+  const updateCompanyMutation = useMutation({
+    mutationFn: async (companyData: any) => {
+      const response = await apiRequest("PUT", `/api/admin/companies/${companyData.id}`, companyData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setIsEditModalOpen(false);
+      setSelectedCompany(null);
+      toast({
+        title: "Success",
+        description: "Company updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update company",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete company mutation
+  const deleteCompanyMutation = useMutation({
+    mutationFn: async (companyId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/companies/${companyId}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setIsDeleteDialogOpen(false);
+      setSelectedCompany(null);
+      toast({
+        title: "Success",
+        description: "Company deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete company",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateCompany = (e: React.FormEvent) => {
     e.preventDefault();
     createCompanyMutation.mutate(newCompany);
+  };
+
+  const handleEditCompany = (company: Company) => {
+    setEditCompany({
+      id: company.id,
+      name: company.name,
+      email: company.email,
+      phone: company.phone || "",
+      address: company.address || "",
+      isActive: company.isActive,
+    });
+    setSelectedCompany(company);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateCompany = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateCompanyMutation.mutate(editCompany);
+  };
+
+  const handleDeleteCompany = (company: Company) => {
+    setSelectedCompany(company);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteCompany = () => {
+    if (selectedCompany) {
+      deleteCompanyMutation.mutate(selectedCompany.id);
+    }
   };
 
   const handleLogout = async () => {
@@ -348,11 +441,33 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{company.userCount} users</p>
-                      <p className="text-xs text-gray-500">
-                        Created {new Date(company.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{company.userCount} users</p>
+                        <p className="text-xs text-gray-500">
+                          Created {new Date(company.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditCompany(company)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Company
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteCompany(company)}
+                            className="text-red-600 dark:text-red-400"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Company
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))
@@ -361,6 +476,107 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Company Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Company</DialogTitle>
+            <DialogDescription>
+              Update company information and settings.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateCompany} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-name">Company Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editCompany.name}
+                  onChange={(e) => setEditCompany({...editCompany, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editCompany.email}
+                  onChange={(e) => setEditCompany({...editCompany, email: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={editCompany.phone}
+                  onChange={(e) => setEditCompany({...editCompany, phone: e.target.value})}
+                />
+              </div>
+              <div className="flex items-center space-x-2 pt-6">
+                <Switch
+                  checked={editCompany.isActive}
+                  onCheckedChange={(checked) => setEditCompany({...editCompany, isActive: checked})}
+                />
+                <Label>Active</Label>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-address">Address</Label>
+              <Input
+                id="edit-address"
+                value={editCompany.address}
+                onChange={(e) => setEditCompany({...editCompany, address: e.target.value})}
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateCompanyMutation.isPending}>
+                {updateCompanyMutation.isPending ? "Updating..." : "Update Company"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Company Confirmation */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Company</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedCompany?.name}"? This action cannot be undone.
+              {selectedCompany?.userCount > 0 && (
+                <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded text-sm">
+                  Warning: This company has {selectedCompany.userCount} user(s). 
+                  You cannot delete a company with existing users.
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCompany}
+              disabled={deleteCompanyMutation.isPending || (selectedCompany?.userCount || 0) > 0}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteCompanyMutation.isPending ? "Deleting..." : "Delete Company"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
