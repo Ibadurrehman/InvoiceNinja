@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, varchar, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -58,7 +58,10 @@ export const invoices = pgTable("invoices", {
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   dueDate: timestamp("due_date").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  // Make invoice number unique per company, not globally unique
+  uniqueNumberPerCompany: uniqueIndex("invoices_number_company_idx").on(table.companyId, table.number),
+}));
 
 export const invoiceItems = pgTable("invoice_items", {
   id: serial("id").primaryKey(),
