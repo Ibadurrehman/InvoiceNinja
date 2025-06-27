@@ -60,10 +60,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/clients/:id", async (req, res) => {
+  app.get("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const client = await storage.getClient(id);
+      const client = await storage.getClient(id, req.companyId);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -73,10 +73,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/clients", async (req, res) => {
+  app.post("/api/clients", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const clientData = insertClientSchema.parse(req.body);
-      const client = await storage.createClient(clientData);
+      const clientWithCompany = { ...clientData, companyId: req.companyId };
+      const client = await storage.createClient(clientWithCompany);
       res.status(201).json(client);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -86,11 +87,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/clients/:id", async (req, res) => {
+  app.put("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const clientData = insertClientSchema.partial().parse(req.body);
-      const client = await storage.updateClient(id, clientData);
+      const client = await storage.updateClient(id, clientData, req.companyId);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -103,10 +104,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/clients/:id", async (req, res) => {
+  app.delete("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteClient(id);
+      const deleted = await storage.deleteClient(id, req.companyId);
       if (!deleted) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -117,9 +118,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate next invoice number (must come before /:id route)
-  app.get("/api/invoices/next-number", async (req, res) => {
+  app.get("/api/invoices/next-number", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const nextNumber = await (storage as any).getNextInvoiceNumber();
+      const nextNumber = await storage.getNextInvoiceNumber(req.companyId);
       res.json({ number: nextNumber });
     } catch (error) {
       console.error("Error generating invoice number:", error);
@@ -128,19 +129,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Invoices routes
-  app.get("/api/invoices", async (req, res) => {
+  app.get("/api/invoices", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const invoices = await storage.getInvoices();
+      const invoices = await storage.getInvoices(req.companyId);
       res.json(invoices);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch invoices" });
     }
   });
 
-  app.get("/api/invoices/:id", async (req, res) => {
+  app.get("/api/invoices/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const invoice = await storage.getInvoice(id);
+      const invoice = await storage.getInvoice(id, req.companyId);
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }
@@ -250,15 +251,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF download route
-  app.get("/api/invoices/:id/pdf", async (req, res) => {
+  app.get("/api/invoices/:id/pdf", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const invoice = await storage.getInvoice(id);
+      const invoice = await storage.getInvoice(id, req.companyId);
       if (!invoice) {
         return res.status(404).json({ message: "Invoice not found" });
       }
 
-      const settings = await storage.getSettings();
+      const settings = await storage.getSettings(req.companyId);
       if (!settings) {
         return res.status(404).json({ message: "Settings not found" });
       }
@@ -277,9 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get("/api/dashboard/stats", async (req, res) => {
+  app.get("/api/dashboard/stats", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const stats = await storage.getDashboardStats(req.companyId);
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
