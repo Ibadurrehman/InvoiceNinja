@@ -150,8 +150,8 @@ export default function BillingManagement() {
   });
 
   const filteredInvoices = invoices?.filter(invoice => {
-    const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         invoice.client.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (invoice.invoiceNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (invoice.client?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
