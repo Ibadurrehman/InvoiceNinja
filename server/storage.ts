@@ -17,6 +17,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, sum, isNull, and } from "drizzle-orm";
+import { or } from "drizzle-orm";
 
 export interface IStorage {
   // Clients
@@ -129,10 +130,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const [invoice] = await db
         .insert(invoices)
-        .values({
-          ...insertInvoice,
-          status: "sent" // Automatically set new invoices as "sent" so they appear in due amounts
-        })
+        .values(insertInvoice)
         .returning();
 
       // Create invoice items
@@ -288,16 +286,19 @@ export class DatabaseStorage implements IStorage {
     
     const totalIncome = allPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
-    // Get due invoices (sent but not fully paid)
-    const sentInvoices = await db
+    // Get due invoices (draft and sent, but not fully paid)
+    const unpaidInvoices = await db
       .select()
       .from(invoices)
-      .where(and(eq(invoices.status, "sent"), eq(invoices.companyId, companyId)));
+      .where(and(
+        or(eq(invoices.status, "draft"), eq(invoices.status, "sent")), 
+        eq(invoices.companyId, companyId)
+      ));
     
     let dueAmount = 0;
     let dueInvoicesCount = 0;
     
-    for (const invoice of sentInvoices) {
+    for (const invoice of unpaidInvoices) {
       // Get payments for this invoice
       const invoicePayments = await db
         .select()
