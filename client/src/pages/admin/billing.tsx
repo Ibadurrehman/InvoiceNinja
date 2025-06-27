@@ -114,7 +114,7 @@ export default function BillingManagement() {
 
   const deleteInvoiceMutation = useMutation({
     mutationFn: async (invoiceId: number) => {
-      return apiRequest(`/api/invoices/${invoiceId}`, { method: "DELETE" });
+      return apiRequest("DELETE", `/api/invoices/${invoiceId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });
@@ -137,10 +137,7 @@ export default function BillingManagement() {
 
   const updateInvoiceStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      return apiRequest(`/api/invoices/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
+      return apiRequest("PATCH", `/api/invoices/${id}`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/invoices"] });

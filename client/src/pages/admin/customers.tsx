@@ -103,9 +103,7 @@ export default function CustomerManagement() {
 
   const deleteCustomerMutation = useMutation({
     mutationFn: async (customerId: number) => {
-      return apiRequest(`/api/clients/${customerId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/clients/${customerId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
@@ -126,13 +124,7 @@ export default function CustomerManagement() {
 
   const updateCustomerStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      return apiRequest(`/api/clients/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      });
+      return apiRequest("PATCH", `/api/clients/${id}`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
