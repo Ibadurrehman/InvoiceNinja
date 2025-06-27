@@ -285,13 +285,30 @@ export class DatabaseStorage implements IStorage {
     
     const totalIncome = allPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
-    // Get due invoices (sent but not paid)
-    const dueInvoices = await db
+    // Get due invoices (sent but not fully paid)
+    const sentInvoices = await db
       .select()
       .from(invoices)
       .where(and(eq(invoices.status, "sent"), eq(invoices.companyId, companyId)));
-    const dueAmount = dueInvoices.reduce((sum, i) => sum + parseFloat(i.total), 0);
-    const dueInvoicesCount = dueInvoices.length;
+    
+    let dueAmount = 0;
+    let dueInvoicesCount = 0;
+    
+    for (const invoice of sentInvoices) {
+      // Get payments for this invoice
+      const invoicePayments = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.invoiceId, invoice.id));
+      
+      const totalPaid = invoicePayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const remainingAmount = parseFloat(invoice.total) - totalPaid;
+      
+      if (remainingAmount > 0) {
+        dueAmount += remainingAmount;
+        dueInvoicesCount++;
+      }
+    }
 
     const recentTransactions = await db
       .select()
