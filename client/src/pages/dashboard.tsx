@@ -68,7 +68,12 @@ export default function Dashboard() {
                 <p className="text-xl font-bold">
                   {formatCurrency(stats?.dueAmount || 0)}
                 </p>
-                <p className="text-orange-200 text-xs">5 invoices</p>
+                <p className="text-orange-200 text-xs">
+                  {stats?.dueInvoicesCount === 0 
+                    ? "No pending invoices" 
+                    : `${stats?.dueInvoicesCount} ${stats?.dueInvoicesCount === 1 ? 'invoice' : 'invoices'}`
+                  }
+                </p>
               </div>
               <Clock className="h-6 w-6 text-orange-200" />
             </div>

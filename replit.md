@@ -116,6 +116,8 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Fixed critical data isolation security vulnerability in multi-tenant system - all API routes now enforce company-based data filtering
 - June 27, 2025: Fixed client creation validation error by implementing separate frontend/backend validation schemas
 - June 27, 2025: Fixed invoice creation validation error - implemented proper authentication and company-based data injection for invoice creation
+- June 27, 2025: Fixed invoice number uniqueness constraint to be company-scoped instead of global - each company can now have their own INV-001, INV-002, etc.
+- June 27, 2025: Updated dashboard stats to show real data instead of hardcoded placeholders - displays actual due invoice counts and income totals
 
 ## User Preferences
 
