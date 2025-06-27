@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Layout } from "@/components/layout";
 import { useAuth } from "@/hooks/useAuth";
 import AdminLayout from "@/components/admin-layout";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 import Dashboard from "@/pages/dashboard";
 import Clients from "@/pages/clients";
 import Invoices from "@/pages/invoices";

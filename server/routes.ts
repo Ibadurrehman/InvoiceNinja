@@ -361,7 +361,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PWA Routes - serve manifest and service worker
+  app.get("/manifest.json", (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile("manifest.json", { root: "client/public" });
+  });
 
+  app.get("/sw.js", (req, res) => {
+    res.setHeader('Content-Type', 'text/javascript');
+    res.sendFile("sw.js", { root: "client/public" });
+  });
+
+  // PWA Icons
+  app.get("/icon-192x192.svg", (req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.sendFile("icon-192x192.svg", { root: "client/public" });
+  });
+
+  app.get("/icon-512x512.svg", (req, res) => {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.sendFile("icon-512x512.svg", { root: "client/public" });
+  });
 
   const httpServer = createServer(app);
   return httpServer;
