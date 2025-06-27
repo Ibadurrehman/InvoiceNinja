@@ -84,7 +84,7 @@ export function registerAdminRoutes(app: Express) {
 
   app.post("/api/admin/companies", requireAdmin, async (req, res) => {
     try {
-      const { name, email, phone, address, adminUser } = createCompanySchema.parse(req.body);
+      const { name, email, phone, address, adminFirstName, adminLastName, adminPassword } = createCompanySchema.parse(req.body);
 
       // Create company
       const [company] = await db
@@ -95,10 +95,10 @@ export function registerAdminRoutes(app: Express) {
       // Create admin user for the company
       const user = await authService.createUser(
         company.id,
-        adminUser.email,
-        adminUser.password,
-        adminUser.firstName,
-        adminUser.lastName,
+        email, // Use company email as admin email
+        adminPassword,
+        adminFirstName,
+        adminLastName,
         'admin'
       );
 

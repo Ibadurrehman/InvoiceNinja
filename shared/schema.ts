@@ -115,12 +115,9 @@ export const adminLoginSchema = z.object({
 });
 
 export const createCompanySchema = insertCompanySchema.extend({
-  adminUser: z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-  })
+  adminFirstName: z.string().min(1),
+  adminLastName: z.string().min(1),
+  adminPassword: z.string().min(6),
 });
 
 // Relations
