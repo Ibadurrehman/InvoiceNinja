@@ -40,7 +40,6 @@ const frontendInvoiceItemSchema = z.object({
 
 const frontendCreateInvoiceSchema = z.object({
   clientId: z.string().min(1, "Client is required"),
-  status: z.string().min(1, "Status is required"),
   dueDate: z.string().min(1, "Due date is required"),
   taxRate: z.string().optional(),
   items: z.array(frontendInvoiceItemSchema).min(1, "At least one item is required"),
@@ -73,7 +72,6 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
     resolver: zodResolver(frontendCreateInvoiceSchema),
     defaultValues: {
       clientId: "",
-      status: "sent",
       dueDate: "",
       taxRate: "0",
       items: [{ description: "", quantity: "1", rate: "" }],
@@ -210,27 +208,7 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="sent">Sent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <FormField
               control={form.control}

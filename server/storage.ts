@@ -129,7 +129,10 @@ export class DatabaseStorage implements IStorage {
     try {
       const [invoice] = await db
         .insert(invoices)
-        .values(insertInvoice)
+        .values({
+          ...insertInvoice,
+          status: "sent" // Automatically set new invoices as "sent" so they appear in due amounts
+        })
         .returning();
 
       // Create invoice items
