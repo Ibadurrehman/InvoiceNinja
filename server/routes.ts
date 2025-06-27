@@ -17,12 +17,8 @@ import {
 import { z } from "zod";
 
 // Extend the Request interface to include companyId
-declare global {
-  namespace Express {
-    interface Request {
-      companyId?: number;
-    }
-  }
+interface AuthenticatedRequest extends Express.Request {
+  companyId: number;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -62,7 +58,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Clients routes
   app.get("/api/clients", requireAuth, requireCompanyAccess, async (req, res) => {
     try {
-      const clients = await storage.getClients(req.companyId);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const clients = await storage.getClients(companyId);
       res.json(clients);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch clients" });
