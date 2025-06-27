@@ -9,6 +9,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 interface DashboardStats {
   totalIncome: number;
   dueAmount: number;
+  dueInvoicesCount: number;
   recentTransactions: Array<{
     id: number;
     amount: string;
@@ -50,7 +51,9 @@ export default function Dashboard() {
                 <p className="text-xl font-bold">
                   {formatCurrency(stats?.totalIncome || 0)}
                 </p>
-                <p className="text-emerald-200 text-xs">+12% this month</p>
+                <p className="text-emerald-200 text-xs">
+                  {stats?.totalIncome === 0 ? "No income yet" : "Total earned"}
+                </p>
               </div>
               <TrendingUp className="h-6 w-6 text-emerald-200" />
             </div>

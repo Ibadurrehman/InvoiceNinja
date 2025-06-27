@@ -48,6 +48,7 @@ export interface IStorage {
   getDashboardStats(companyId: number): Promise<{
     totalIncome: number;
     dueAmount: number;
+    dueInvoicesCount: number;
     recentTransactions: (Payment & { client: Client; invoiceNumber: string })[];
   }>;
 
@@ -272,6 +273,7 @@ export class DatabaseStorage implements IStorage {
   async getDashboardStats(companyId: number): Promise<{
     totalIncome: number;
     dueAmount: number;
+    dueInvoicesCount: number;
     recentTransactions: (Payment & { client: Client; invoiceNumber: string })[];
   }> {
     const allPayments = await db
@@ -283,11 +285,13 @@ export class DatabaseStorage implements IStorage {
     
     const totalIncome = allPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
+    // Get due invoices (sent but not paid)
     const dueInvoices = await db
       .select()
       .from(invoices)
       .where(and(eq(invoices.status, "sent"), eq(invoices.companyId, companyId)));
     const dueAmount = dueInvoices.reduce((sum, i) => sum + parseFloat(i.total), 0);
+    const dueInvoicesCount = dueInvoices.length;
 
     const recentTransactions = await db
       .select()
@@ -304,7 +308,12 @@ export class DatabaseStorage implements IStorage {
       invoiceNumber: row.invoices?.number || ""
     }));
 
-    return { totalIncome, dueAmount, recentTransactions: formattedTransactions };
+    return { 
+      totalIncome, 
+      dueAmount, 
+      dueInvoicesCount,
+      recentTransactions: formattedTransactions 
+    };
   }
 
   async getNextInvoiceNumber(companyId: number): Promise<string> {
