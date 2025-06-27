@@ -157,31 +157,40 @@ export default function AdminDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiCards.map((kpi) => {
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {kpiCards.map((kpi, index) => {
           const Icon = kpi.icon;
           const isPositive = kpi.change > 0;
+          const gradients = [
+            "bg-gradient-to-br from-blue-500 to-blue-600",
+            "bg-gradient-to-br from-emerald-500 to-emerald-600", 
+            "bg-gradient-to-br from-amber-500 to-orange-500",
+            "bg-gradient-to-br from-purple-500 to-purple-600"
+          ];
           return (
-            <Card key={kpi.title}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card key={kpi.title} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <div className={`absolute inset-0 ${gradients[index]} opacity-5`}></div>
+              <CardContent className="p-6 relative">
+                <div className="flex items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     {kpi.title}
                   </CardTitle>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <div className={`p-2 rounded-lg ${gradients[index]} shadow-lg`}>
+                    <Icon className="h-4 w-4 text-white" />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold">{kpi.value}</div>
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{kpi.value}</div>
                   <div className="flex items-center text-xs">
                     {isPositive ? (
-                      <ArrowUpRight className="mr-1 h-3 w-3 text-green-600" />
+                      <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-600" />
                     ) : (
-                      <ArrowDownRight className="mr-1 h-3 w-3 text-red-600" />
+                      <ArrowDownRight className="mr-1 h-3 w-3 text-red-500" />
                     )}
-                    <span className={isPositive ? "text-green-600" : "text-red-600"}>
+                    <span className={`font-medium ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
                       {Math.abs(kpi.change).toFixed(1)}%
                     </span>
-                    <span className="text-muted-foreground ml-1">{kpi.description}</span>
+                    <span className="text-slate-500 dark:text-slate-400 ml-1">{kpi.description}</span>
                   </div>
                 </div>
               </CardContent>
@@ -203,15 +212,17 @@ export default function AdminDashboard() {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 border-b border-emerald-200/20">
+                <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg mr-3">
+                    <Activity className="h-4 w-4 text-white" />
+                  </div>
                   Recent Activity
                 </CardTitle>
-                <CardDescription>Latest transactions and invoice updates</CardDescription>
+                <CardDescription className="text-slate-600 dark:text-slate-400">Latest transactions and invoice updates</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-gradient-to-b from-emerald-50/20 to-transparent dark:from-emerald-900/10">
                 <div className="space-y-4">
                   {stats?.recentTransactions?.slice(0, 5).map((transaction) => (
                     <div key={transaction.id} className="flex items-center space-x-3">
@@ -234,15 +245,17 @@ export default function AdminDashboard() {
             </Card>
 
             {/* Invoice Status */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5" />
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 border-b border-blue-200/20">
+                <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3">
+                    <FileText className="h-4 w-4 text-white" />
+                  </div>
                   Invoice Status
                 </CardTitle>
-                <CardDescription>Current invoice distribution</CardDescription>
+                <CardDescription className="text-slate-600 dark:text-slate-400">Current invoice distribution</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">

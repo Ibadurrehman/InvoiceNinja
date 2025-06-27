@@ -132,15 +132,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   const Sidebar = () => (
-    <div className="flex h-full w-64 flex-col bg-card border-r">
-      <div className="flex h-16 items-center border-b px-6">
+    <div className="flex h-full w-64 flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+      <div className="flex h-16 items-center border-b border-slate-200/50 dark:border-slate-700/50 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Shield className="h-4 w-4 text-primary-foreground" />
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+            <Shield className="h-4 w-4 text-white" />
           </div>
           <div>
             <h1 className="font-semibold text-lg">Admin Dashboard</h1>
-            <p className="text-muted-foreground text-xs">BillTracker Pro</p>
+            <p className="text-white/70 text-xs">BillTracker Pro</p>
           </div>
         </div>
       </div>
@@ -153,16 +153,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             return (
               <Link key={item.name} href={item.href}>
                 <div
-                  className={`flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-3 rounded-lg mx-3 px-3 py-3 text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700/50 hover:text-blue-700 dark:hover:text-blue-300"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                   <div className="flex-1">
                     <div>{item.name}</div>
-                    <div className="text-xs opacity-70">{item.description}</div>
+                    <div className={`text-xs ${isActive ? 'text-white/70' : 'text-slate-500 dark:text-slate-400'}`}>
+                      {item.description}
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -171,21 +173,21 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
       </div>
 
-      <div className="border-t p-4">
+      <div className="border-t border-slate-200/50 dark:border-slate-700/50 p-4 bg-gradient-to-t from-slate-50/50 to-transparent dark:from-slate-800/50">
         <div className="space-y-3">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
             Quick Stats
           </div>
           <div className="grid grid-cols-2 gap-2">
             {quickStats.map((stat) => {
               const Icon = stat.icon;
               return (
-                <div key={stat.name} className="rounded-lg bg-muted/50 p-2">
+                <div key={stat.name} className="rounded-lg bg-gradient-to-br from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 p-3 border border-slate-200/50 dark:border-slate-600/50 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center space-x-2">
-                    <Icon className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-xs font-medium">{stat.value}</span>
+                    <Icon className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-medium text-slate-900 dark:text-slate-100">{stat.value}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                     {stat.name}
                   </div>
                 </div>
@@ -198,7 +200,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Desktop Sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
         <Sidebar />
@@ -214,7 +216,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Navigation */}
-        <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-40 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl shadow-sm">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex items-center space-x-4">
               <Sheet>
@@ -304,8 +306,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1">
-          <div className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 relative">
+          <div className="p-4 sm:p-6 lg:p-8 relative z-10">
             {children}
           </div>
         </main>
