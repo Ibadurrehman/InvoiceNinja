@@ -121,6 +121,7 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Fixed authentication redirect issues by improving login flow - added proper cache invalidation and full page refresh after successful login
 - June 27, 2025: Updated due amount calculation to include draft invoices - removed Status dropdown from invoice creation and simplified workflow
 - June 27, 2025: Cleaned up login screen by removing demo account credentials display
+- June 27, 2025: Updated admin login email from admin@billtracker.com to ibadurrehman14@gmail.com
 
 ## User Preferences
 
