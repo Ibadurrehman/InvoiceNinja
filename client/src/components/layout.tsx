@@ -70,7 +70,7 @@ export function Layout({ children }: LayoutProps) {
             <p className="text-primary-foreground/70 text-xs">Mobile Billing</p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
@@ -85,6 +85,16 @@ export function Layout({ children }: LayoutProps) {
             className="text-primary-foreground hover:bg-primary-foreground/10"
           >
             <Bell className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            className="text-primary-foreground hover:bg-primary-foreground/10"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </header>
