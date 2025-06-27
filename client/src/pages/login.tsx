@@ -109,19 +109,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials */}
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-            Demo Account
-          </h3>
-          <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
-            Use these credentials to access the demo billing system:
-          </p>
-          <div className="space-y-1 text-xs font-mono text-blue-800 dark:text-blue-200">
-            <div>Email: user@demo.com</div>
-            <div>Password: demo123</div>
-          </div>
-        </div>
+
       </div>
     </div>
   );
