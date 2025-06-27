@@ -51,9 +51,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clients routes
-  app.get("/api/clients", async (req, res) => {
+  app.get("/api/clients", requireAuth, requireCompanyAccess, async (req, res) => {
     try {
-      const clients = await storage.getClients();
+      const clients = await storage.getClients(req.companyId);
       res.json(clients);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch clients" });

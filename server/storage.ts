@@ -20,36 +20,39 @@ import { eq, desc, like, sum, isNull, and } from "drizzle-orm";
 
 export interface IStorage {
   // Clients
-  getClients(): Promise<Client[]>;
-  getClient(id: number): Promise<Client | undefined>;
+  getClients(companyId: number): Promise<Client[]>;
+  getClient(id: number, companyId: number): Promise<Client | undefined>;
   createClient(client: InsertClient): Promise<Client>;
-  updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
-  deleteClient(id: number): Promise<boolean>;
+  updateClient(id: number, client: Partial<InsertClient>, companyId: number): Promise<Client | undefined>;
+  deleteClient(id: number, companyId: number): Promise<boolean>;
 
   // Invoices
-  getInvoices(): Promise<(Invoice & { client: Client })[]>;
-  getInvoice(id: number): Promise<(Invoice & { client: Client; items: InvoiceItem[] }) | undefined>;
+  getInvoices(companyId: number): Promise<(Invoice & { client: Client })[]>;
+  getInvoice(id: number, companyId: number): Promise<(Invoice & { client: Client; items: InvoiceItem[] }) | undefined>;
   createInvoice(invoice: InsertInvoice, items: InsertInvoiceItem[]): Promise<Invoice>;
-  updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined>;
-  deleteInvoice(id: number): Promise<boolean>;
+  updateInvoice(id: number, invoice: Partial<InsertInvoice>, companyId: number): Promise<Invoice | undefined>;
+  deleteInvoice(id: number, companyId: number): Promise<boolean>;
 
   // Invoice Items
   getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]>;
   
   // Payments
-  getPayments(invoiceId?: number): Promise<Payment[]>;
+  getPayments(companyId: number, invoiceId?: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
 
   // Settings
-  getSettings(): Promise<Settings | undefined>;
-  updateSettings(settings: Partial<InsertSettings>): Promise<Settings>;
+  getSettings(companyId: number): Promise<Settings | undefined>;
+  updateSettings(settings: Partial<InsertSettings>, companyId: number): Promise<Settings>;
 
   // Dashboard
-  getDashboardStats(): Promise<{
+  getDashboardStats(companyId: number): Promise<{
     totalIncome: number;
     dueAmount: number;
     recentTransactions: (Payment & { client: Client; invoiceNumber: string })[];
   }>;
+
+  // Invoice number generation
+  getNextInvoiceNumber(companyId: number): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {
