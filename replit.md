@@ -118,6 +118,7 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Fixed invoice creation validation error - implemented proper authentication and company-based data injection for invoice creation
 - June 27, 2025: Fixed invoice number uniqueness constraint to be company-scoped instead of global - each company can now have their own INV-001, INV-002, etc.
 - June 27, 2025: Updated dashboard stats to show real data instead of hardcoded placeholders - displays actual due invoice counts and income totals
+- June 27, 2025: Fixed authentication redirect issues by improving login flow - added proper cache invalidation and full page refresh after successful login
 
 ## User Preferences
 
