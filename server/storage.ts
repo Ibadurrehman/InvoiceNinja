@@ -58,12 +58,14 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   private currentInvoiceNumber: number = 1;
 
-  async getClients(): Promise<Client[]> {
-    return await db.select().from(clients);
+  async getClients(companyId: number): Promise<Client[]> {
+    return await db.select().from(clients).where(eq(clients.companyId, companyId));
   }
 
-  async getClient(id: number): Promise<Client | undefined> {
-    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+  async getClient(id: number, companyId: number): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(
+      and(eq(clients.id, id), eq(clients.companyId, companyId))
+    );
     return client || undefined;
   }
 
@@ -75,25 +77,28 @@ export class DatabaseStorage implements IStorage {
     return client;
   }
 
-  async updateClient(id: number, clientUpdate: Partial<InsertClient>): Promise<Client | undefined> {
+  async updateClient(id: number, clientUpdate: Partial<InsertClient>, companyId: number): Promise<Client | undefined> {
     const [client] = await db
       .update(clients)
       .set(clientUpdate)
-      .where(eq(clients.id, id))
+      .where(and(eq(clients.id, id), eq(clients.companyId, companyId)))
       .returning();
     return client || undefined;
   }
 
-  async deleteClient(id: number): Promise<boolean> {
-    const result = await db.delete(clients).where(eq(clients.id, id));
+  async deleteClient(id: number, companyId: number): Promise<boolean> {
+    const result = await db.delete(clients).where(
+      and(eq(clients.id, id), eq(clients.companyId, companyId))
+    );
     return (result.rowCount || 0) > 0;
   }
 
-  async getInvoices(): Promise<(Invoice & { client: Client })[]> {
+  async getInvoices(companyId: number): Promise<(Invoice & { client: Client })[]> {
     const result = await db
       .select()
       .from(invoices)
-      .leftJoin(clients, eq(invoices.clientId, clients.id));
+      .leftJoin(clients, eq(invoices.clientId, clients.id))
+      .where(eq(invoices.companyId, companyId));
     
     return result.map(row => ({
       ...row.invoices,
@@ -101,12 +106,12 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getInvoice(id: number): Promise<(Invoice & { client: Client; items: InvoiceItem[] }) | undefined> {
+  async getInvoice(id: number, companyId: number): Promise<(Invoice & { client: Client; items: InvoiceItem[] }) | undefined> {
     const [invoiceWithClient] = await db
       .select()
       .from(invoices)
       .leftJoin(clients, eq(invoices.clientId, clients.id))
-      .where(eq(invoices.id, id));
+      .where(and(eq(invoices.id, id), eq(invoices.companyId, companyId)));
 
     if (!invoiceWithClient) return undefined;
 
