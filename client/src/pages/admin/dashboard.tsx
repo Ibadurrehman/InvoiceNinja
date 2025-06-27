@@ -1,322 +1,294 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Plus, Users, Building, Activity, Edit, Trash2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { formatDate } from "@/lib/utils";
-
-const createCompanySchema = z.object({
-  name: z.string().min(1, "Company name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  adminUser: z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-  }),
-});
-
-type CreateCompanyForm = z.infer<typeof createCompanySchema>;
+import { Plus, Building, Users, Activity, LogOut } from "lucide-react";
 
 interface AdminDashboardProps {
   admin: any;
   onLogout: () => void;
 }
 
+interface Company {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  isActive: boolean;
+  createdAt: string;
+  userCount: number;
+}
+
 export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newCompany, setNewCompany] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    adminFirstName: "",
+    adminLastName: "",
+    adminPassword: "",
+  });
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-
-  const form = useForm<CreateCompanyForm>({
-    resolver: zodResolver(createCompanySchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      adminUser: {
-        email: "",
-        password: "",
-        firstName: "",
-        lastName: "",
-      },
-    },
-  });
-
-  // Fetch admin stats
-  const { data: stats } = useQuery({
-    queryKey: ["/api/admin/stats"],
-  });
 
   // Fetch companies
-  const { data: companies, isLoading: companiesLoading } = useQuery({
+  const { data: companies = [], isLoading } = useQuery({
     queryKey: ["/api/admin/companies"],
+  });
+
+  // Fetch stats
+  const { data: stats = {} } = useQuery({
+    queryKey: ["/api/admin/stats"],
   });
 
   // Create company mutation
   const createCompanyMutation = useMutation({
-    mutationFn: async (data: CreateCompanyForm) => {
-      const response = await apiRequest("POST", "/api/admin/companies", data);
+    mutationFn: async (companyData: any) => {
+      const response = await apiRequest("POST", "/api/admin/companies", companyData);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setIsCreateModalOpen(false);
+      setNewCompany({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        adminFirstName: "",
+        adminLastName: "",
+        adminPassword: "",
+      });
       toast({
         title: "Success",
         description: "Company created successfully",
       });
-      setCreateModalOpen(false);
-      form.reset();
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error?.message || "Failed to create company",
+        description: error.message || "Failed to create company",
         variant: "destructive",
       });
     },
   });
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/admin/logout", {});
-      return response.json();
-    },
-    onSuccess: () => {
+  const handleCreateCompany = (e: React.FormEvent) => {
+    e.preventDefault();
+    createCompanyMutation.mutate(newCompany);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/admin/logout", {});
       onLogout();
-      toast({
-        title: "Success",
-        description: "Logged out successfully",
-      });
-    },
-  });
-
-  const onSubmit = (data: CreateCompanyForm) => {
-    createCompanyMutation.mutate(data);
+    } catch (error) {
+      console.error("Logout error:", error);
+      onLogout(); // Force logout even if API call fails
+    }
   };
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Building className="w-8 h-8 text-blue-600 mr-3" />
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Admin Dashboard
               </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                Welcome back, {admin.firstName} {admin.lastName}
-              </p>
             </div>
-            <Button onClick={handleLogout} variant="outline">
-              Logout
-            </Button>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Welcome, {admin.firstName} {admin.lastName}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalCompanies || 0}</div>
+              <div className="text-2xl font-bold">{stats.totalCompanies || companies.length}</div>
             </CardContent>
           </Card>
-
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Companies</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.activeCompanies || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.activeCompanies || companies.filter((c: Company) => c.isActive).length}
+              </div>
             </CardContent>
           </Card>
-
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.totalUsers || companies.reduce((sum: number, c: Company) => sum + c.userCount, 0)}
+              </div>
             </CardContent>
           </Card>
-
+          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Users</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.activeUsers || 0}</div>
+              <div className="text-2xl font-bold">
+                {stats.activeUsers || companies.reduce((sum: number, c: Company) => sum + c.userCount, 0)}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Companies Table */}
+        {/* Companies Section */}
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle>Companies</CardTitle>
                 <CardDescription>
-                  Manage company accounts and their users
+                  Manage company accounts and their billing systems
                 </CardDescription>
               </div>
-              <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+              <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                 <DialogTrigger asChild>
                   <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Company
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Company
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>Create New Company</DialogTitle>
                     <DialogDescription>
-                      Create a new company account with an admin user
+                      Add a new company with an admin account
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Company Name</Label>
-                      <Input
-                        id="name"
-                        placeholder="Company Name"
-                        {...form.register("name")}
-                      />
-                      {form.formState.errors.name && (
-                        <p className="text-sm text-red-600">
-                          {form.formState.errors.name.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Company Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="company@example.com"
-                        {...form.register("email")}
-                      />
-                      {form.formState.errors.email && (
-                        <p className="text-sm text-red-600">
-                          {form.formState.errors.email.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        placeholder="+91 98765 43210"
-                        {...form.register("phone")}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="address">Address</Label>
-                      <Input
-                        id="address"
-                        placeholder="Company Address"
-                        {...form.register("address")}
-                      />
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <h4 className="font-medium mb-2">Admin User</h4>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="adminFirstName">First Name</Label>
-                          <Input
-                            id="adminFirstName"
-                            placeholder="John"
-                            {...form.register("adminUser.firstName")}
-                          />
-                          {form.formState.errors.adminUser?.firstName && (
-                            <p className="text-sm text-red-600">
-                              {form.formState.errors.adminUser.firstName.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="adminLastName">Last Name</Label>
-                          <Input
-                            id="adminLastName"
-                            placeholder="Doe"
-                            {...form.register("adminUser.lastName")}
-                          />
-                          {form.formState.errors.adminUser?.lastName && (
-                            <p className="text-sm text-red-600">
-                              {form.formState.errors.adminUser.lastName.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
+                  <form onSubmit={handleCreateCompany} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="adminEmail">Email</Label>
+                        <Label htmlFor="name">Company Name</Label>
                         <Input
-                          id="adminEmail"
+                          id="name"
+                          value={newCompany.name}
+                          onChange={(e) => setNewCompany({...newCompany, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Company Email</Label>
+                        <Input
+                          id="email"
                           type="email"
-                          placeholder="admin@company.com"
-                          {...form.register("adminUser.email")}
+                          value={newCompany.email}
+                          onChange={(e) => setNewCompany({...newCompany, email: e.target.value})}
+                          required
                         />
-                        {form.formState.errors.adminUser?.email && (
-                          <p className="text-sm text-red-600">
-                            {form.formState.errors.adminUser.email.message}
-                          </p>
-                        )}
                       </div>
-
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="adminPassword">Password</Label>
+                        <Label htmlFor="phone">Phone</Label>
                         <Input
-                          id="adminPassword"
-                          type="password"
-                          placeholder="Minimum 6 characters"
-                          {...form.register("adminUser.password")}
+                          id="phone"
+                          value={newCompany.phone}
+                          onChange={(e) => setNewCompany({...newCompany, phone: e.target.value})}
                         />
-                        {form.formState.errors.adminUser?.password && (
-                          <p className="text-sm text-red-600">
-                            {form.formState.errors.adminUser.password.message}
-                          </p>
-                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Address</Label>
+                        <Input
+                          id="address"
+                          value={newCompany.address}
+                          onChange={(e) => setNewCompany({...newCompany, address: e.target.value})}
+                        />
                       </div>
                     </div>
 
-                    <div className="flex justify-end space-x-2">
-                      <Button type="button" variant="outline" onClick={() => setCreateModalOpen(false)}>
+                    <hr className="my-4" />
+                    <h4 className="font-medium">Admin Account</h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="adminFirstName">First Name</Label>
+                        <Input
+                          id="adminFirstName"
+                          value={newCompany.adminFirstName}
+                          onChange={(e) => setNewCompany({...newCompany, adminFirstName: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="adminLastName">Last Name</Label>
+                        <Input
+                          id="adminLastName"
+                          value={newCompany.adminLastName}
+                          onChange={(e) => setNewCompany({...newCompany, adminLastName: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="adminPassword">Admin Password</Label>
+                      <Input
+                        id="adminPassword"
+                        type="password"
+                        value={newCompany.adminPassword}
+                        onChange={(e) => setNewCompany({...newCompany, adminPassword: e.target.value})}
+                        required
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsCreateModalOpen(false)}
+                      >
                         Cancel
                       </Button>
                       <Button type="submit" disabled={createCompanyMutation.isPending}>
@@ -329,47 +301,43 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
             </div>
           </CardHeader>
           <CardContent>
-            {companiesLoading ? (
-              <div className="text-center py-8">Loading companies...</div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Company</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Users</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {companies?.map((company: any) => (
-                    <TableRow key={company.id}>
-                      <TableCell className="font-medium">{company.name}</TableCell>
-                      <TableCell>{company.email}</TableCell>
-                      <TableCell>{company.userCount || 0}</TableCell>
-                      <TableCell>
+            <div className="space-y-4">
+              {companies.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No companies found. Create your first company to get started.
+                </div>
+              ) : (
+                companies.map((company: Company) => (
+                  <div
+                    key={company.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="font-medium">{company.name}</h3>
                         <Badge variant={company.isActive ? "default" : "secondary"}>
                           {company.isActive ? "Active" : "Inactive"}
                         </Badge>
-                      </TableCell>
-                      <TableCell>{formatDate(company.createdAt)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {company.email}
+                      </p>
+                      {company.phone && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {company.phone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{company.userCount} users</p>
+                      <p className="text-xs text-gray-500">
+                        Created {new Date(company.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

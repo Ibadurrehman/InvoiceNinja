@@ -8,19 +8,19 @@ export default function AdminLayout() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if admin is already logged in
-  const { data: adminData, isLoading: queryLoading } = useQuery({
+  const { data: adminResponse, isLoading: queryLoading } = useQuery({
     queryKey: ["/api/admin/me"],
     retry: false,
   });
 
   useEffect(() => {
     if (!queryLoading) {
-      if (adminData?.admin) {
-        setAdmin(adminData.admin);
+      if (adminResponse?.admin) {
+        setAdmin(adminResponse.admin);
       }
       setIsLoading(false);
     }
-  }, [adminData, queryLoading]);
+  }, [adminResponse, queryLoading]);
 
   const handleLogin = (adminUser: any) => {
     setAdmin(adminUser);

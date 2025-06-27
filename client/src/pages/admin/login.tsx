@@ -1,116 +1,101 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiRequest } from "@/lib/queryClient";
-
-const adminLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type AdminLoginForm = z.infer<typeof adminLoginSchema>;
+import { Shield } from "lucide-react";
 
 interface AdminLoginProps {
   onLogin: (admin: any) => void;
 }
 
 export default function AdminLogin({ onLogin }: AdminLoginProps) {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<AdminLoginForm>({
-    resolver: zodResolver(adminLoginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const loginMutation = useMutation({
-    mutationFn: async (data: AdminLoginForm) => {
-      setIsLoading(true);
-      const response = await apiRequest("POST", "/api/admin/login", data);
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/admin/login", { 
+        email, 
+        password 
+      });
       return response.json();
     },
-    onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      });
-      onLogin(data.admin);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error?.message || "Login failed",
-        variant: "destructive",
-      });
-    },
-    onSettled: () => {
-      setIsLoading(false);
+    onSuccess: (data: any) => {
+      if (data.admin) {
+        onLogin(data.admin);
+      }
     },
   });
 
-  const onSubmit = (data: AdminLoginForm) => {
-    loginMutation.mutate(data);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate();
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <div className="mx-auto mb-4 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+            <Shield className="w-6 h-6 text-white" />
+          </div>
+          <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>
-            Access the admin dashboard to manage company accounts
+            Access the admin dashboard to manage companies and users
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
-                {...form.register("email")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@billtracker.com"
+                required
               />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
             </div>
-            
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                {...form.register("password")}
+                required
               />
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
             </div>
-
+            
+            {loginMutation.error && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Invalid credentials. Please check your email and password.
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <Button 
               type="submit" 
-              className="w-full" 
-              disabled={isLoading}
+              className="w-full"
+              disabled={loginMutation.isPending}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {loginMutation.isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          
+          <div className="mt-6 text-sm text-center text-gray-600 dark:text-gray-400">
+            <p>Default credentials:</p>
+            <p className="font-mono text-xs">
+              admin@billtracker.com / password123
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
