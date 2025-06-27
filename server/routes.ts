@@ -72,7 +72,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const client = await storage.getClient(id, req.companyId);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const client = await storage.getClient(id, companyId);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -85,7 +89,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/clients", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const clientData = insertClientSchema.parse(req.body);
-      const clientWithCompany = { ...clientData, companyId: req.companyId };
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const clientWithCompany = { ...clientData, companyId };
       const client = await storage.createClient(clientWithCompany);
       res.status(201).json(client);
     } catch (error) {
@@ -99,8 +107,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
       const clientData = insertClientSchema.partial().parse(req.body);
-      const client = await storage.updateClient(id, clientData, req.companyId);
+      const client = await storage.updateClient(id, clientData, companyId);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -116,7 +128,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/clients/:id", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteClient(id, req.companyId);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const deleted = await storage.deleteClient(id, companyId);
       if (!deleted) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -129,7 +145,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate next invoice number (must come before /:id route)
   app.get("/api/invoices/next-number", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const nextNumber = await storage.getNextInvoiceNumber(req.companyId);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const nextNumber = await storage.getNextInvoiceNumber(companyId);
       res.json({ number: nextNumber });
     } catch (error) {
       console.error("Error generating invoice number:", error);
@@ -140,7 +160,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Invoices routes
   app.get("/api/invoices", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const invoices = await storage.getInvoices(req.companyId);
+      const companyId = req.session?.user?.companyId;
+      if (!companyId) {
+        return res.status(403).json({ message: "Company access required" });
+      }
+      const invoices = await storage.getInvoices(companyId);
       res.json(invoices);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch invoices" });
