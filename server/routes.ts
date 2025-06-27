@@ -7,7 +7,8 @@ import { sessionConfig, requireAuth, requireCompanyAccess } from "./session";
 import { registerAdminRoutes } from "./admin-routes";
 import { PDFGenerator } from "./pdf-generator";
 import { 
-  insertClientSchema, 
+  insertClientSchema,
+  createClientSchema,
   insertInvoiceSchema, 
   insertInvoiceItemSchema,
   insertPaymentSchema,
@@ -88,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/clients", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const clientData = insertClientSchema.parse(req.body);
+      const clientData = createClientSchema.parse(req.body);
       const companyId = req.session?.user?.companyId;
       if (!companyId) {
         return res.status(403).json({ message: "Company access required" });
