@@ -225,9 +225,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Settings routes
-  app.get("/api/settings", async (req, res) => {
+  app.get("/api/settings", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
-      const settings = await storage.getSettings();
+      const settings = await storage.getSettings(req.companyId);
       if (!settings) {
         return res.status(404).json({ message: "Settings not found" });
       }
@@ -237,10 +237,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/settings", async (req, res) => {
+  app.put("/api/settings", requireAuth, requireCompanyAccess, async (req: any, res) => {
     try {
       const settingsData = insertSettingsSchema.partial().parse(req.body);
-      const settings = await storage.updateSettings(settingsData);
+      const settings = await storage.updateSettings(settingsData, req.companyId);
       res.json(settings);
     } catch (error) {
       if (error instanceof z.ZodError) {

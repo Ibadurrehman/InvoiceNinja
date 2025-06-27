@@ -179,14 +179,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(invoiceItems.invoiceId, invoiceId));
   }
 
-  async getPayments(invoiceId?: number): Promise<Payment[]> {
+  async getPayments(companyId: number, invoiceId?: number): Promise<Payment[]> {
     if (invoiceId) {
       return await db
         .select()
         .from(payments)
-        .where(eq(payments.invoiceId, invoiceId));
+        .leftJoin(invoices, eq(payments.invoiceId, invoices.id))
+        .where(and(eq(payments.invoiceId, invoiceId), eq(invoices.companyId, companyId)))
+        .then(rows => rows.map(row => row.payments));
     }
-    return await db.select().from(payments);
+    
+    return await db
+      .select()
+      .from(payments)
+      .leftJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .where(eq(invoices.companyId, companyId))
+      .then(rows => rows.map(row => row.payments));
   }
 
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
@@ -195,24 +203,30 @@ export class DatabaseStorage implements IStorage {
       .values(insertPayment)
       .returning();
 
-    // Update invoice status if fully paid
-    const invoicePayments = await this.getPayments(payment.invoiceId);
-    const totalPaid = invoicePayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
-    
+    // Update invoice status if fully paid - we need companyId context
     const [invoice] = await db
       .select()
       .from(invoices)
       .where(eq(invoices.id, payment.invoiceId));
     
-    if (invoice && totalPaid >= parseFloat(invoice.total)) {
-      await this.updateInvoice(payment.invoiceId, { status: "paid" });
+    if (invoice) {
+      const invoicePayments = await this.getPayments(invoice.companyId, payment.invoiceId);
+      const totalPaid = invoicePayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      
+      if (totalPaid >= parseFloat(invoice.total)) {
+        await this.updateInvoice(payment.invoiceId, { status: "paid" }, invoice.companyId);
+      }
     }
 
     return payment;
   }
 
-  async getSettings(): Promise<Settings | undefined> {
-    const [setting] = await db.select().from(settings).limit(1);
+  async getSettings(companyId: number): Promise<Settings | undefined> {
+    const [setting] = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.companyId, companyId))
+      .limit(1);
     
     // Create default settings if none exist
     if (!setting) {
@@ -223,19 +237,20 @@ export class DatabaseStorage implements IStorage {
         address: '123 Business Street, City, State, India',
         currency: 'INR',
         defaultTaxRate: '18.00'
-      });
+      }, companyId);
     }
     
     return setting;
   }
 
-  async updateSettings(settingsUpdate: Partial<InsertSettings>): Promise<Settings> {
-    const existingSettings = await this.getSettings();
+  async updateSettings(settingsUpdate: Partial<InsertSettings>, companyId: number): Promise<Settings> {
+    const existingSettings = await this.getSettings(companyId);
     
     if (!existingSettings) {
       const [newSettings] = await db
         .insert(settings)
         .values({
+          companyId,
           companyName: "Your Business Name",
           email: "business@email.com",
           currency: "INR",
@@ -248,24 +263,30 @@ export class DatabaseStorage implements IStorage {
       const [updatedSettings] = await db
         .update(settings)
         .set(settingsUpdate)
-        .where(eq(settings.id, existingSettings.id))
+        .where(and(eq(settings.id, existingSettings.id), eq(settings.companyId, companyId)))
         .returning();
       return updatedSettings;
     }
   }
 
-  async getDashboardStats(): Promise<{
+  async getDashboardStats(companyId: number): Promise<{
     totalIncome: number;
     dueAmount: number;
     recentTransactions: (Payment & { client: Client; invoiceNumber: string })[];
   }> {
-    const allPayments = await db.select().from(payments);
+    const allPayments = await db
+      .select()
+      .from(payments)
+      .leftJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .where(eq(invoices.companyId, companyId))
+      .then(rows => rows.map(row => row.payments));
+    
     const totalIncome = allPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
 
     const dueInvoices = await db
       .select()
       .from(invoices)
-      .where(eq(invoices.status, "sent"));
+      .where(and(eq(invoices.status, "sent"), eq(invoices.companyId, companyId)));
     const dueAmount = dueInvoices.reduce((sum, i) => sum + parseFloat(i.total), 0);
 
     const recentTransactions = await db
@@ -273,6 +294,7 @@ export class DatabaseStorage implements IStorage {
       .from(payments)
       .leftJoin(invoices, eq(payments.invoiceId, invoices.id))
       .leftJoin(clients, eq(invoices.clientId, clients.id))
+      .where(eq(invoices.companyId, companyId))
       .orderBy(desc(payments.paymentDate))
       .limit(10);
 
@@ -285,11 +307,12 @@ export class DatabaseStorage implements IStorage {
     return { totalIncome, dueAmount, recentTransactions: formattedTransactions };
   }
 
-  async getNextInvoiceNumber(): Promise<string> {
-    // Get all invoice numbers that follow the pattern INV-DIGITS
+  async getNextInvoiceNumber(companyId: number): Promise<string> {
+    // Get all invoice numbers that follow the pattern INV-DIGITS for this company
     const allInvoices = await db
       .select({ number: invoices.number })
-      .from(invoices);
+      .from(invoices)
+      .where(eq(invoices.companyId, companyId));
 
     // Find the highest numeric invoice number (supports both INV-001 and INV-1 formats)
     let maxNumber = 0;
