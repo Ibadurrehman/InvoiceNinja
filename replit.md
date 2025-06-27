@@ -128,6 +128,7 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Updated admin login email from admin@billtracker.com to ibadurrehman14@gmail.com
 - June 27, 2025: Cleaned up admin login screen by removing default credentials display
 - June 27, 2025: Converted application to Progressive Web App (PWA) with manifest, service worker, offline support, and install prompts
+- June 27, 2025: Added edit and delete functionality to admin dashboard for company management with safety constraints
 
 ## User Preferences
 
