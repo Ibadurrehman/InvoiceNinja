@@ -11,8 +11,10 @@ export function useAuth() {
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30, // 30 seconds - shorter for better responsiveness
+    gcTime: 1000 * 60 * 10, // 10 minutes (renamed from cacheTime in v5)
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 
   return {

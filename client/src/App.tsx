@@ -57,7 +57,8 @@ function AppContent() {
 }
 
 function AuthenticatedApp() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [location] = useLocation();
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -71,8 +72,15 @@ function AuthenticatedApp() {
     );
   }
 
+  // Debug logging for authentication issues
+  console.log("Auth state:", { isAuthenticated, user, location });
+
   // If not authenticated, show login page
   if (!isAuthenticated) {
+    // Only show login if we're not already on the login page
+    if (location !== "/login") {
+      return <Login />;
+    }
     return <Login />;
   }
 
