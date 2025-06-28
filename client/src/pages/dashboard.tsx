@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CreateInvoiceModal } from "@/components/create-invoice-modal";
+import { CreateClientModal } from "@/components/create-client-modal";
 import { TrendingUp, Clock, Plus, UserPlus, BarChart3 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ interface DashboardStats {
 
 export default function Dashboard() {
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
+  const [showCreateClient, setShowCreateClient] = useState(false);
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
@@ -95,6 +97,7 @@ export default function Dashboard() {
           <Button
             variant="secondary"
             className="h-auto p-4 flex flex-col items-center space-y-2"
+            onClick={() => setShowCreateClient(true)}
           >
             <UserPlus className="h-6 w-6" />
             <span className="text-sm font-medium">Add Client</span>
@@ -168,6 +171,11 @@ export default function Dashboard() {
       <CreateInvoiceModal
         open={showCreateInvoice}
         onOpenChange={setShowCreateInvoice}
+      />
+      
+      <CreateClientModal
+        open={showCreateClient}
+        onOpenChange={setShowCreateClient}
       />
     </div>
   );
