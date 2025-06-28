@@ -92,6 +92,11 @@ export default function Clients() {
           ))
         )}
       </div>
+      
+      <CreateClientModal
+        open={showCreateClient}
+        onOpenChange={setShowCreateClient}
+      />
     </div>
   );
 }
