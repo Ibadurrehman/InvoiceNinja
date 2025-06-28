@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Building, Users, Activity, LogOut } from "lucide-react";
+import { Plus, Building, Users, Activity, LogOut, Edit, Trash2, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface AdminDashboardProps {
   admin: any;
@@ -28,6 +30,8 @@ interface Company {
 
 export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [newCompany, setNewCompany] = useState({
     name: "",
     email: "",
@@ -36,6 +40,12 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
     adminFirstName: "",
     adminLastName: "",
     adminPassword: "",
+  });
+  const [editCompanyData, setEditCompanyData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
   
   const { toast } = useToast();
