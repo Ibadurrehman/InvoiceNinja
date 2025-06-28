@@ -119,7 +119,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Welcome, {admin.firstName} {admin.lastName}
+                Welcome, Admin
               </span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -319,7 +319,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {companies.length === 0 ? (
+              {!Array.isArray(companies) || companies.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   No companies found. Create your first company to get started.
                 </div>
