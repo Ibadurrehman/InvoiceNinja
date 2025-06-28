@@ -94,9 +94,78 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
     },
   });
 
+  // Edit company mutation
+  const editCompanyMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: typeof editCompanyData }) => {
+      const response = await apiRequest("PUT", `/api/admin/companies/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
+      setIsEditModalOpen(false);
+      setEditingCompany(null);
+      toast({
+        title: "Success",
+        description: "Company updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update company",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete company mutation
+  const deleteCompanyMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/companies/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      toast({
+        title: "Success",
+        description: "Company deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete company",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateCompany = (e: React.FormEvent) => {
     e.preventDefault();
     createCompanyMutation.mutate(newCompany);
+  };
+
+  const handleEditCompany = (company: Company) => {
+    setEditingCompany(company);
+    setEditCompanyData({
+      name: company.name,
+      email: company.email,
+      phone: company.phone || "",
+      address: company.address || "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateCompany = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingCompany) {
+      editCompanyMutation.mutate({ id: editingCompany.id, data: editCompanyData });
+    }
+  };
+
+  const handleDeleteCompany = (id: number) => {
+    deleteCompanyMutation.mutate(id);
   };
 
   const handleLogout = async () => {
@@ -325,6 +394,73 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                   </form>
                 </DialogContent>
               </Dialog>
+
+              {/* Edit Company Dialog */}
+              <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Edit Company</DialogTitle>
+                    <DialogDescription>
+                      Update company information
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleUpdateCompany} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="editName">Company Name</Label>
+                        <Input
+                          id="editName"
+                          value={editCompanyData.name}
+                          onChange={(e) => setEditCompanyData({...editCompanyData, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="editEmail">Company Email</Label>
+                        <Input
+                          id="editEmail"
+                          type="email"
+                          value={editCompanyData.email}
+                          onChange={(e) => setEditCompanyData({...editCompanyData, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="editPhone">Phone</Label>
+                        <Input
+                          id="editPhone"
+                          value={editCompanyData.phone}
+                          onChange={(e) => setEditCompanyData({...editCompanyData, phone: e.target.value})}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="editAddress">Address</Label>
+                        <Input
+                          id="editAddress"
+                          value={editCompanyData.address}
+                          onChange={(e) => setEditCompanyData({...editCompanyData, address: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end space-x-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsEditModalOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={editCompanyMutation.isPending}>
+                        {editCompanyMutation.isPending ? "Updating..." : "Update Company"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
@@ -355,11 +491,51 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{company.userCount} users</p>
-                      <p className="text-xs text-gray-500">
-                        Created {new Date(company.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{company.userCount} users</p>
+                        <p className="text-xs text-gray-500">
+                          Created {new Date(company.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditCompany(company)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Company</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{company.name}"? This action cannot be undone and will permanently remove all company data and users.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteCompany(company.id)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))
