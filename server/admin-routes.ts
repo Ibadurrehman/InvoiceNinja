@@ -7,13 +7,17 @@ import {
   users, 
   adminUsers,
   settings,
+  clients,
+  invoices,
+  invoiceItems,
+  payments,
   loginSchema, 
   adminLoginSchema, 
   createCompanySchema,
   type Company,
   type User
 } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {
   // Admin authentication routes
@@ -157,18 +161,47 @@ export function registerAdminRoutes(app: Express) {
     try {
       const id = parseInt(req.params.id);
 
-      // Check if company has users
-      const [userCount] = await db
-        .select({ count: users.id })
-        .from(users)
-        .where(eq(users.companyId, id));
+      // Get all invoices for this company to cascade delete related data
+      const companyInvoices = await db
+        .select({ id: invoices.id })
+        .from(invoices)
+        .where(eq(invoices.companyId, id));
 
-      if (userCount.count > 0) {
-        return res.status(400).json({ 
-          message: "Cannot delete company with existing users" 
-        });
+      const invoiceIds = companyInvoices.map(inv => inv.id);
+
+      // Delete invoice items for all company invoices
+      if (invoiceIds.length > 0) {
+        await db
+          .delete(invoiceItems)
+          .where(inArray(invoiceItems.invoiceId, invoiceIds));
+        
+        // Delete payments for all company invoices
+        await db
+          .delete(payments)
+          .where(inArray(payments.invoiceId, invoiceIds));
       }
 
+      // Delete all invoices for the company
+      await db
+        .delete(invoices)
+        .where(eq(invoices.companyId, id));
+
+      // Delete all clients for the company
+      await db
+        .delete(clients)
+        .where(eq(clients.companyId, id));
+
+      // Delete all users associated with the company
+      await db
+        .delete(users)
+        .where(eq(users.companyId, id));
+
+      // Delete company settings
+      await db
+        .delete(settings)
+        .where(eq(settings.companyId, id));
+
+      // Finally delete the company
       const [company] = await db
         .delete(companies)
         .where(eq(companies.id, id))
@@ -178,7 +211,7 @@ export function registerAdminRoutes(app: Express) {
         return res.status(404).json({ message: "Company not found" });
       }
 
-      res.json({ message: "Company deleted successfully" });
+      res.json({ message: "Company and all associated data deleted successfully" });
     } catch (error) {
       console.error("Error deleting company:", error);
       res.status(500).json({ message: "Failed to delete company" });

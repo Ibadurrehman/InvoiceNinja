@@ -520,7 +520,10 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Company</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{company.name}"? This action cannot be undone and will permanently remove all company data and users.
+                                  Are you sure you want to delete "{company.name}"? This action cannot be undone and will permanently remove:
+                                  <br />• All company data and settings
+                                  <br />• All users associated with this company
+                                  <br />• All invoices, clients, and payment records
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
