@@ -128,6 +128,9 @@ RESTful API endpoints following conventional patterns:
 - June 27, 2025: Updated admin login email from admin@billtracker.com to ibadurrehman14@gmail.com
 - June 27, 2025: Cleaned up admin login screen by removing default credentials display
 - June 27, 2025: Converted application to Progressive Web App (PWA) with manifest, service worker, offline support, and install prompts
+- June 28, 2025: Added descriptive placeholder text to all Create/Edit Company dialog input fields in admin dashboard for better UX
+- June 28, 2025: Fixed admin stats calculation error when database is empty by using proper Drizzle ORM count function
+- June 28, 2025: Replaced dollar symbol ($) with rupee symbol (₹) in invoice creation form line item calculations for Indian market consistency
 
 ## User Preferences
 

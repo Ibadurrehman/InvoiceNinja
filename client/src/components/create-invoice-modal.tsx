@@ -264,7 +264,7 @@ export function CreateInvoiceModal({ open, onOpenChange }: CreateInvoiceModalPro
                     />
                     <div className="col-span-2 flex items-center gap-1">
                       <span className="text-sm">
-                        ${((parseFloat(form.watch(`items.${index}.quantity`) || "0") * 
+                        ₹{((parseFloat(form.watch(`items.${index}.quantity`) || "0") * 
                            parseFloat(form.watch(`items.${index}.rate`) || "0"))).toFixed(2)}
                       </span>
                       {form.watch("items").length > 1 && (
