@@ -17,7 +17,7 @@ import {
   type Company,
   type User
 } from "@shared/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, count } from "drizzle-orm";
 
 export function registerAdminRoutes(app: Express) {
   // Admin authentication routes
@@ -243,20 +243,20 @@ export function registerAdminRoutes(app: Express) {
   app.get("/api/admin/stats", requireAdmin, async (req, res) => {
     try {
       const [totalCompanies] = await db
-        .select({ count: companies.id })
+        .select({ count: count() })
         .from(companies);
 
       const [activeCompanies] = await db
-        .select({ count: companies.id })
+        .select({ count: count() })
         .from(companies)
         .where(eq(companies.isActive, true));
 
       const [totalUsers] = await db
-        .select({ count: users.id })
+        .select({ count: count() })
         .from(users);
 
       const [activeUsers] = await db
-        .select({ count: users.id })
+        .select({ count: count() })
         .from(users)
         .where(eq(users.isActive, true));
 

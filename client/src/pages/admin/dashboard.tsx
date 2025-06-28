@@ -308,6 +308,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="name">Company Name</Label>
                         <Input
                           id="name"
+                          placeholder="Acme Corporation"
                           value={newCompany.name}
                           onChange={(e) => setNewCompany({...newCompany, name: e.target.value})}
                           required
@@ -318,6 +319,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Input
                           id="email"
                           type="email"
+                          placeholder="info@acmecorp.com"
                           value={newCompany.email}
                           onChange={(e) => setNewCompany({...newCompany, email: e.target.value})}
                           required
@@ -330,6 +332,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="phone">Phone</Label>
                         <Input
                           id="phone"
+                          placeholder="+91 98765 43210"
                           value={newCompany.phone}
                           onChange={(e) => setNewCompany({...newCompany, phone: e.target.value})}
                         />
@@ -338,6 +341,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="address">Address</Label>
                         <Input
                           id="address"
+                          placeholder="123 Business District, Mumbai"
                           value={newCompany.address}
                           onChange={(e) => setNewCompany({...newCompany, address: e.target.value})}
                         />
@@ -352,6 +356,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="adminFirstName">First Name</Label>
                         <Input
                           id="adminFirstName"
+                          placeholder="John"
                           value={newCompany.adminFirstName}
                           onChange={(e) => setNewCompany({...newCompany, adminFirstName: e.target.value})}
                           required
@@ -361,6 +366,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="adminLastName">Last Name</Label>
                         <Input
                           id="adminLastName"
+                          placeholder="Smith"
                           value={newCompany.adminLastName}
                           onChange={(e) => setNewCompany({...newCompany, adminLastName: e.target.value})}
                           required
@@ -373,6 +379,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                       <Input
                         id="adminPassword"
                         type="password"
+                        placeholder="Enter secure password"
                         value={newCompany.adminPassword}
                         onChange={(e) => setNewCompany({...newCompany, adminPassword: e.target.value})}
                         required
@@ -410,6 +417,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="editName">Company Name</Label>
                         <Input
                           id="editName"
+                          placeholder="Enter company name"
                           value={editCompanyData.name}
                           onChange={(e) => setEditCompanyData({...editCompanyData, name: e.target.value})}
                           required
@@ -420,6 +428,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Input
                           id="editEmail"
                           type="email"
+                          placeholder="Enter company email"
                           value={editCompanyData.email}
                           onChange={(e) => setEditCompanyData({...editCompanyData, email: e.target.value})}
                           required
@@ -432,6 +441,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="editPhone">Phone</Label>
                         <Input
                           id="editPhone"
+                          placeholder="Enter phone number"
                           value={editCompanyData.phone}
                           onChange={(e) => setEditCompanyData({...editCompanyData, phone: e.target.value})}
                         />
@@ -440,6 +450,7 @@ export default function AdminDashboard({ admin, onLogout }: AdminDashboardProps)
                         <Label htmlFor="editAddress">Address</Label>
                         <Input
                           id="editAddress"
+                          placeholder="Enter company address"
                           value={editCompanyData.address}
                           onChange={(e) => setEditCompanyData({...editCompanyData, address: e.target.value})}
                         />
